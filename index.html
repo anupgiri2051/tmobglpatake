@@ -211,7 +211,7 @@
 
 <div class="top-stripe no-print"></div>
 
-<!-- Header with Reliable High-Quality Emblem Image -->
+<!-- Header -->
 <div class="header no-print">
     <div class="header-left">
         <img class="gov-logo" src="https://raw.githubusercontent.com/nepal-gov/assets/main/emblem_of_nepal.png" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Emblem_of_Nepal.svg/500px-Emblem_of_Nepal.svg.png';" alt="Nepal Crest Emblem">
@@ -330,7 +330,7 @@
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5_0-YQs5Dv_tnkuU5zQQ8_suip_stkazNvwfZ6OeC0UUaWux1owWkE3RVDwWMw9EFng/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby56I7wLlSvceeN6prHnCasYspo7aLx27ZiRXLmYJ9yDfSjD_sWhSoHPXqUtjOIxDhk-w/exec";
 
     var map = L.map('map').setView([28.2721, 83.5901], 10);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
@@ -343,12 +343,21 @@
         geocoder: L.Control.Geocoder.nominatim()
     }).addTo(map);
 
+    // Dynamic 50Km Step Amount Logic:
+    // 0 - 50 km   = 100
+    // 51 - 100 km = 200
+    // 101 - 150 km = 300
+    // 151 - 200 km = 400 ... and so on.
     control.on('routesfound', function(e) {
         var summary = e.routes[0].summary;
-        var distanceKm = (summary.totalDistance / 1000).toFixed(2);
+        var distanceKm = parseFloat((summary.totalDistance / 1000).toFixed(2));
         document.getElementById('v-dist').value = distanceKm + " Km";
         
-        let amount = distanceKm <= 50 ? 100 : (distanceKm <= 100 ? 200 : 300);
+        let amount = 0;
+        if (distanceKm > 0) {
+            amount = Math.ceil(distanceKm / 50) * 100;
+        }
+        
         document.getElementById('auto-amt').value = "रू. " + amount;
 
         if(routeFrom && routeTo) {
