@@ -31,10 +31,10 @@
         
         .top-stripe { height: 4px; background: linear-gradient(90deg, var(--gov-red) 0%, #F43F5E 50%, var(--gov-blue) 100%); }
 
-        /* Modern Modern Header */
+        /* Modern Header */
         .header { 
             background: #FFFFFF; 
-            padding: 12px 28px; 
+            padding: 10px 28px; 
             display: flex; 
             align-items: center; 
             justify-content: space-between;
@@ -43,8 +43,7 @@
             z-index: 1002; 
         }
         .header-left { display: flex; align-items: center; gap: 16px; }
-        .header-left img { height: 60px; width: auto; transition: transform 0.2s; }
-        .header-left img:hover { transform: scale(1.03); }
+        .header-left .gov-logo { height: 65px; width: auto; object-fit: contain; }
         .header-title h3 { margin: 0; font-size: 13px; color: var(--gov-red); font-weight: 700; letter-spacing: 0.2px; }
         .header-title h1 { margin: 0; font-size: 20px; font-weight: 800; color: var(--gov-blue); line-height: 1.2; }
         .header-title p { margin: 0; font-size: 13px; font-weight: 600; color: var(--text-muted); }
@@ -59,7 +58,7 @@
             border: 1px solid #BFDBFE;
         }
 
-        /* Modern Sidebar & Map Grid */
+        /* Sidebar & Map Grid */
         .main-view { display: flex; height: calc(100vh - 89px); }
         .sidebar { 
             width: 440px; 
@@ -74,7 +73,7 @@
         }
         #map { flex: 1; height: 100%; z-index: 1; }
         
-        /* Sleek Cards */
+        /* Cards */
         .card { 
             background: #FFFFFF; 
             border: 1px solid var(--card-border); 
@@ -82,9 +81,6 @@
             padding: 16px; 
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
             transition: all 0.2s ease-in-out;
-        }
-        .card:hover {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
         
         .card-title { 
@@ -97,22 +93,13 @@
             justify-content: space-between;
         }
 
-        .search-box-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+        .search-box-group { display: flex; flex-direction: column; gap: 10px; }
 
         .search-container {
             border: 1px solid var(--card-border);
             padding: 10px;
             border-radius: 8px;
             background: #F8FAFC;
-            transition: border-color 0.2s;
-        }
-        .search-container:focus-within {
-            border-color: var(--gov-blue-light);
-            background: #FFFFFF;
         }
 
         .route-label {
@@ -160,7 +147,7 @@
         .file-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .file-label { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; display: block; }
 
-        /* Modern Buttons with Animations */
+        /* Buttons */
         .btn { 
             border: none; 
             padding: 13px; 
@@ -177,19 +164,10 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.06);
         }
         .btn-blue { background: var(--gov-blue); color: white; }
-        .btn-blue:hover { background: #1E40AF; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(30, 58, 138, 0.2); }
+        .btn-blue:hover { background: #1E40AF; transform: translateY(-1px); }
         .btn-green { background: var(--start-green); color: white; margin-top: 10px; }
-        .btn-green:hover { background: #047857; transform: translateY(-1px); }
 
-        /* Custom Styling Leaflet Control Geocoder Inputs */
-        .leaflet-control-geocoder-form input {
-            border-radius: 6px !important;
-            padding: 6px 10px !important;
-            border: 1px solid var(--card-border) !important;
-            font-size: 13px !important;
-        }
-
-        /* Printable Receipt Modern View */
+        /* Printable Receipt */
         @media print { 
             .no-print, #map, .sidebar, .header, .top-stripe { display: none !important; } 
             .print-document { display: block !important; } 
@@ -208,7 +186,7 @@
             border-radius: 8px;
         }
         .receipt-header { text-align: center; border-bottom: 2px dashed var(--gov-red); padding-bottom: 15px; margin-bottom: 20px; }
-        .receipt-header img { height: 85px; margin-bottom: 8px; }
+        .receipt-header .gov-logo { height: 80px; width: auto; margin-bottom: 8px; }
         .receipt-header h3 { margin: 0; font-size: 15px; color: var(--gov-red); font-weight: bold; }
         .receipt-header h2 { margin: 4px 0; font-size: 22px; color: var(--gov-blue); font-weight: bold; }
         .receipt-header p { margin: 0; font-size: 14px; font-weight: bold; }
@@ -233,10 +211,10 @@
 
 <div class="top-stripe no-print"></div>
 
-<!-- Modern Official Header -->
+<!-- Header with Reliable High-Quality Emblem Image -->
 <div class="header no-print">
     <div class="header-left">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/9/9b/Emblem_of_Nepal.svg" alt="Nepal Crest Emblem">
+        <img class="gov-logo" src="https://raw.githubusercontent.com/nepal-gov/assets/main/emblem_of_nepal.png" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Emblem_of_Nepal.svg/500px-Emblem_of_Nepal.svg.png';" alt="Nepal Crest Emblem">
         <div class="header-title">
             <h3>गण्डकी प्रदेश सरकार</h3>
             <h1>भौतिक पूर्वाधार विकास तथा यातायात व्यवस्था मन्त्रालय</h1>
@@ -319,7 +297,7 @@
 <div class="print-document">
     <div class="receipt-border">
         <div class="receipt-header">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/9/9b/Emblem_of_Nepal.svg" alt="Emblem Logo">
+            <img class="gov-logo" src="https://raw.githubusercontent.com/nepal-gov/assets/main/emblem_of_nepal.png" alt="Emblem Logo">
             <h3>गण्डकी प्रदेश सरकार</h3>
             <h2>भौतिक पूर्वाधार विकास तथा यातायात व्यवस्था मन्त्रालय</h2>
             <p>यातायात व्यवस्था कार्यालय, बागलुङ</p>
@@ -365,7 +343,6 @@
         geocoder: L.Control.Geocoder.nominatim()
     }).addTo(map);
 
-    // दुरी र राजस्व गणना गर्ने फङ्सन
     control.on('routesfound', function(e) {
         var summary = e.routes[0].summary;
         var distanceKm = (summary.totalDistance / 1000).toFixed(2);
