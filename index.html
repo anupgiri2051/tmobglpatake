@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>यातायात व्यवस्था कार्यालय, बागलुङ - पटके प्रणाली</title>
+    
+    <!-- Google Fonts & Leaflet Libraries -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Mukta:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    
+    <style>
+        :root { 
+            --gov-red: #E11D48; 
+            --gov-blue: #1E3A8A; 
+            --gov-blue-light: #2563EB;
+            --bg-slate: #F8FAFC; 
+            --card-border: #E2E8F0;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --start-green: #059669;
+        }
+        
+        * { box-sizing: border-box; font-family: 'Mukta', 'Inter', sans-serif; }
+        body, html { margin: 0; padding: 0; height: 100%; background: var(--bg-slate); color: var(--text-main); }
+        
+        .top-stripe { height: 4px; background: linear-gradient(90deg, var(--gov-red) 0%, #F43F5E 50%, var(--gov-blue) 100%); }
+
+        /* Modern Modern Header */
+        .header { 
+            background: #FFFFFF; 
+            padding: 12px 28px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
+            border-bottom: 1px solid var(--card-border);
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+            z-index: 1002; 
+        }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .header-left img { height: 60px; width: auto; transition: transform 0.2s; }
+        .header-left img:hover { transform: scale(1.03); }
+        .header-title h3 { margin: 0; font-size: 13px; color: var(--gov-red); font-weight: 700; letter-spacing: 0.2px; }
+        .header-title h1 { margin: 0; font-size: 20px; font-weight: 800; color: var(--gov-blue); line-height: 1.2; }
+        .header-title p { margin: 0; font-size: 13px; font-weight: 600; color: var(--text-muted); }
+
+        .system-badge {
+            background: #EFF6FF;
+            color: var(--gov-blue-light);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid #BFDBFE;
+        }
+
+        /* Modern Sidebar & Map Grid */
+        .main-view { display: flex; height: calc(100vh - 89px); }
+        .sidebar { 
+            width: 440px; 
+            background: #FFFFFF; 
+            padding: 20px; 
+            border-right: 1px solid var(--card-border);
+            z-index: 1001; 
+            overflow-y: auto; 
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        #map { flex: 1; height: 100%; z-index: 1; }
+        
+        /* Sleek Cards */
+        .card { 
+            background: #FFFFFF; 
+            border: 1px solid var(--card-border); 
+            border-radius: 12px; 
+            padding: 16px; 
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+            transition: all 0.2s ease-in-out;
+        }
+        .card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        
+        .card-title { 
+            font-size: 15px; 
+            font-weight: 800; 
+            color: var(--text-main); 
+            margin-bottom: 12px; 
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .search-box-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .search-container {
+            border: 1px solid var(--card-border);
+            padding: 10px;
+            border-radius: 8px;
+            background: #F8FAFC;
+            transition: border-color 0.2s;
+        }
+        .search-container:focus-within {
+            border-color: var(--gov-blue-light);
+            background: #FFFFFF;
+        }
+
+        .route-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .text-start { color: var(--start-green); }
+        .text-end { color: var(--gov-red); }
+
+        .input-box { 
+            width: 100%; 
+            padding: 10px 14px; 
+            border: 1px solid var(--card-border); 
+            border-radius: 8px; 
+            margin-bottom: 10px; 
+            font-size: 14px;
+            outline: none;
+            background: #FFFFFF;
+            transition: all 0.2s;
+            color: var(--text-main);
+        }
+        .input-box:focus { border-color: var(--gov-blue-light); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .input-readonly { background-color: #F1F5F9; font-weight: 700; color: #334155; }
+        
+        #route-name {
+            background-color: #EFF6FF;
+            border-color: #BFDBFE;
+            color: var(--gov-blue);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        #auto-amt { 
+            background-color: #FFF1F2; 
+            font-weight: 800; 
+            color: var(--gov-red); 
+            border-color: #FECDD3; 
+            font-size: 16px;
+        }
+        
+        .file-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .file-label { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; display: block; }
+
+        /* Modern Buttons with Animations */
+        .btn { 
+            border: none; 
+            padding: 13px; 
+            border-radius: 8px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            width: 100%; 
+            font-size: 15px; 
+            transition: all 0.2s ease-in-out; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+        }
+        .btn-blue { background: var(--gov-blue); color: white; }
+        .btn-blue:hover { background: #1E40AF; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(30, 58, 138, 0.2); }
+        .btn-green { background: var(--start-green); color: white; margin-top: 10px; }
+        .btn-green:hover { background: #047857; transform: translateY(-1px); }
+
+        /* Custom Styling Leaflet Control Geocoder Inputs */
+        .leaflet-control-geocoder-form input {
+            border-radius: 6px !important;
+            padding: 6px 10px !important;
+            border: 1px solid var(--card-border) !important;
+            font-size: 13px !important;
+        }
+
+        /* Printable Receipt Modern View */
+        @media print { 
+            .no-print, #map, .sidebar, .header, .top-stripe { display: none !important; } 
+            .print-document { display: block !important; } 
+        }
+        .print-document { 
+            display: none; 
+            width: 100%; 
+            padding: 15mm; 
+            background: white; 
+            font-family: 'Mukta', 'Times New Roman', serif;
+        }
+        .receipt-border { 
+            border: 2px solid var(--gov-blue); 
+            padding: 28px; 
+            position: relative; 
+            border-radius: 8px;
+        }
+        .receipt-header { text-align: center; border-bottom: 2px dashed var(--gov-red); padding-bottom: 15px; margin-bottom: 20px; }
+        .receipt-header img { height: 85px; margin-bottom: 8px; }
+        .receipt-header h3 { margin: 0; font-size: 15px; color: var(--gov-red); font-weight: bold; }
+        .receipt-header h2 { margin: 4px 0; font-size: 22px; color: var(--gov-blue); font-weight: bold; }
+        .receipt-header p { margin: 0; font-size: 14px; font-weight: bold; }
+        
+        .receipt-badge { 
+            background: var(--gov-blue); 
+            color: white; 
+            display: inline-block; 
+            padding: 6px 24px; 
+            border-radius: 20px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            margin-top: 12px; 
+        }
+        
+        .receipt-body { font-size: 16px; line-height: 2.2; margin-top: 25px; }
+        .receipt-body span { font-weight: bold; border-bottom: 1px dotted #333; }
+        .amount-highlight { font-size: 24px; color: var(--gov-red); font-weight: 800; }
+    </style>
+</head>
+<body>
+
+<div class="top-stripe no-print"></div>
+
+<!-- Modern Official Header -->
+<div class="header no-print">
+    <div class="header-left">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/9/9b/Emblem_of_Nepal.svg" alt="Nepal Crest Emblem">
+        <div class="header-title">
+            <h3>गण्डकी प्रदेश सरकार</h3>
+            <h1>भौतिक पूर्वाधार विकास तथा यातायात व्यवस्था मन्त्रालय</h1>
+            <p>यातायात व्यवस्था कार्यालय, बागलुङ</p>
+        </div>
+    </div>
+    <div class="system-badge no-print">
+        पटके प्रणाली v2.0
+    </div>
+</div>
+
+<div class="main-view no-print">
+    <div class="sidebar">
+        <!-- 1. Route Selection Card -->
+        <div class="card">
+            <div class="card-title">१. यात्रा रुट छनौट</div>
+            <div class="search-box-group">
+                <div class="search-container" style="border-left: 3px solid var(--start-green);">
+                    <span class="route-label text-start">📍 प्रस्थान विन्दु (Start Point)</span>
+                    <div id="search-from"></div>
+                </div>
+
+                <div class="search-container" style="border-left: 3px solid var(--gov-red);">
+                    <span class="route-label text-end">🏁 गन्तव्य विन्दु (Destination)</span>
+                    <div id="search-to"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Vehicle Details Card -->
+        <div class="card">
+            <div class="card-title">२. सवारी र चालक विवरण</div>
+            <input type="text" id="v-no" class="input-box" placeholder="सवारी साधन नम्बर (उदा: ध १ ख १२३४)">
+            <input type="text" id="l-no" class="input-box" placeholder="चालक अनुमति पत्र नं (License No.)" style="margin-bottom:0;">
+        </div>
+
+        <!-- 3. Automated Calculated Information -->
+        <div class="card">
+            <div class="card-title">३. छानिएको रुट तथा राजस्व</div>
+            <label class="file-label">छानिएको यात्रा खण्ड:</label>
+            <input type="text" id="route-name" class="input-box input-readonly" placeholder="प्रस्थान र गन्तव्य छान्नुहोस्..." readonly>
+            
+            <div style="display:flex; gap:12px;">
+                <div style="flex:1;">
+                    <label class="file-label">दुरी (Km):</label>
+                    <input type="text" id="v-dist" class="input-box input-readonly" placeholder="0 Km" readonly style="margin-bottom:0;">
+                </div>
+                <div style="flex:1;">
+                    <label class="file-label">राजस्व रकम:</label>
+                    <input type="text" id="auto-amt" class="input-box" placeholder="रू. 0" readonly style="margin-bottom:0;">
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Document Upload Card -->
+        <div class="card">
+            <div class="card-title">४. कागजात अपलोड (Drive)</div>
+            <div class="file-grid">
+                <div>
+                    <span class="file-label">रुट पर्मिट फोटो:</span>
+                    <input type="file" id="route-photo" class="input-box" accept="image/*" style="font-size:11px; margin-bottom:0;">
+                </div>
+                <div>
+                    <span class="file-label">जाँचपास फोटो:</span>
+                    <input type="file" id="fit-photo" class="input-box" accept="image/*" style="font-size:11px; margin-bottom:0;">
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <button id="submit-btn" class="btn btn-blue" onclick="prepareAndSaveData()">💾 विवरण सुरक्षित गरी रसिद बनाउनुहोस्</button>
+            <button id="print-btn" class="btn btn-green" style="display:none;" onclick="window.print()">🖨️ रसिद प्रिन्ट गर्नुहोस्</button>
+        </div>
+    </div>
+    
+    <div id="map"></div>
+</div>
+
+<!-- PRINT RECEIPT TEMPLATE -->
+<div class="print-document">
+    <div class="receipt-border">
+        <div class="receipt-header">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/9/9b/Emblem_of_Nepal.svg" alt="Emblem Logo">
+            <h3>गण्डकी प्रदेश सरकार</h3>
+            <h2>भौतिक पूर्वाधार विकास तथा यातायात व्यवस्था मन्त्रालय</h2>
+            <p>यातायात व्यवस्था कार्यालय, बागलुङ</p>
+            <div class="receipt-badge">पटके यात्रा इजाजत–पत्र</div>
+        </div>
+
+        <div class="receipt-body">
+            <p><b>सवारी साधन नम्बर:</b> <span id="p-v-no"></span></p>
+            <p><b>चालक इजाजत पत्र नं:</b> <span id="p-l-no"></span></p>
+            <p><b>इजाजत दिइएको यात्रा खण्ड:</b> <span id="p-route" style="color:var(--gov-blue);"></span></p>
+            <p><b>जम्मा यात्रा दुरी (Map):</b> <span id="p-dist"></span> कि.मी.</p>
+            <p><b>प्राप्त राजस्व रकम:</b> रू. <span id="p-amt" class="amount-highlight"></span> /-</p>
+            <p><b>जारी गरिएको मिति:</b> <span id="p-date"></span></p>
+        </div>
+        
+        <div style="margin-top: 60px; display: flex; justify-content: space-between; align-items: flex-end;">
+            <div style="font-size:12px; color:#555;">
+                * यो इजाजत पत्र उल्लेखित रुट र अवधिको लागि मात्र मान्य हुनेछ।
+            </div>
+            <div style="text-align: center;">
+                <p style="margin:0;">..........................................</p>
+                <p style="margin:5px 0 0 0; font-size: 14px;"><b>अधिकारप्राप्त अधिकारी</b></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5_0-YQs5Dv_tnkuU5zQQ8_suip_stkazNvwfZ6OeC0UUaWux1owWkE3RVDwWMw9EFng/exec";
+
+    var map = L.map('map').setView([28.2721, 83.5901], 10);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    let fromLatLng = null, toLatLng = null, routeFrom = "", routeTo = "";
+    let fromMarker = null, toMarker = null;
+
+    var control = L.Routing.control({
+        waypoints: [], routeWhileDragging: false, show: false,
+        geocoder: L.Control.Geocoder.nominatim()
+    }).addTo(map);
+
+    // दुरी र राजस्व गणना गर्ने फङ्सन
+    control.on('routesfound', function(e) {
+        var summary = e.routes[0].summary;
+        var distanceKm = (summary.totalDistance / 1000).toFixed(2);
+        document.getElementById('v-dist').value = distanceKm + " Km";
+        
+        let amount = distanceKm <= 50 ? 100 : (distanceKm <= 100 ? 200 : 300);
+        document.getElementById('auto-amt').value = "रू. " + amount;
+
+        if(routeFrom && routeTo) {
+            document.getElementById('route-name').value = routeFrom + " ➔ " + routeTo;
+        }
+    });
+
+    function autoCalculateRouteIfReady() {
+        if (fromLatLng && toLatLng) {
+            control.setWaypoints([fromLatLng, toLatLng]);
+        }
+    }
+
+    function setupSearch(id) {
+        let isStart = (id === 'search-from');
+        let placeholderText = isStart ? "प्रस्थान विन्दु खोज्नुहोस्..." : "गन्तव्य विन्दु खोज्नुहोस्...";
+
+        let g = L.Control.geocoder({ 
+            defaultMarkGeocode: false, 
+            placeholder: placeholderText,
+            geocoder: L.Control.Geocoder.nominatim({
+                geocodingQueryParams: {
+                    'countrycodes': 'np',
+                    'limit': 5,
+                    'accept-language': 'ne,en'
+                }
+            })
+        })
+        .on('markgeocode', function(e) {
+            let locName = e.geocode.name.split(',')[0];
+            
+            if(isStart) { 
+                fromLatLng = e.geocode.center; 
+                routeFrom = locName; 
+                if(fromMarker) map.removeLayer(fromMarker);
+                fromMarker = L.marker(fromLatLng).addTo(map)
+                    .bindPopup("<b style='color:#059669;'>📍 प्रस्थान विन्दु:</b><br>" + locName).openPopup();
+            } else { 
+                toLatLng = e.geocode.center; 
+                routeTo = locName; 
+                if(toMarker) map.removeLayer(toMarker);
+                toMarker = L.marker(toLatLng).addTo(map)
+                    .bindPopup("<b style='color:#E11D48;'>🏁 गन्तव्य विन्दु:</b><br>" + locName).openPopup();
+            }
+
+            if(routeFrom && routeTo) {
+                document.getElementById('route-name').value = routeFrom + " ➔ " + routeTo;
+            } else if(routeFrom) {
+                document.getElementById('route-name').value = routeFrom + " ➔ ...";
+            } else if(routeTo) {
+                document.getElementById('route-name').value = "... ➔ " + routeTo;
+            }
+
+            map.setView(e.geocode.center, 12);
+            autoCalculateRouteIfReady();
+        })
+        .addTo(map);
+
+        document.getElementById(id).appendChild(g.getContainer());
+    }
+
+    setupSearch('search-from');
+    setupSearch('search-to');
+
+    const fileToBase64 = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve({ data: reader.result.split(',')[1], type: file.type });
+        reader.onerror = error => reject(error);
+    });
+
+    async function prepareAndSaveData() {
+        const vNo = document.getElementById('v-no').value;
+        const lNo = document.getElementById('l-no').value;
+        const dist = document.getElementById('v-dist').value;
+        const route = document.getElementById('route-name').value;
+        const amt = document.getElementById('auto-amt').value;
+        
+        const routePhotoFile = document.getElementById('route-photo').files[0];
+        const fitPhotoFile = document.getElementById('fit-photo').files[0];
+
+        if(!vNo || !lNo || !dist) { 
+            alert("कृपया सबै विवरण भर्नुहोस् र नक्सामा दुवै ठाउँ छान्नुहोस्!"); 
+            return; 
+        }
+
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.innerText = "डाटा सेभ हुँदैछ... पर्खनुहोस्";
+        submitBtn.disabled = true;
+
+        try {
+            let routePhotoData = routePhotoFile ? await fileToBase64(routePhotoFile) : null;
+            let fitPhotoData = fitPhotoFile ? await fileToBase64(fitPhotoFile) : null;
+
+            const payload = {
+                vNo: vNo, lNo: lNo, route: route, dist: dist, amt: amt,
+                routePhoto: routePhotoData, fitPhoto: fitPhotoData
+            };
+
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            document.getElementById('p-v-no').innerText = vNo;
+            document.getElementById('p-l-no').innerText = lNo;
+            document.getElementById('p-route').innerText = route;
+            document.getElementById('p-dist').innerText = dist;
+            document.getElementById('p-amt').innerText = amt;
+            document.getElementById('p-date').innerText = new Date().toLocaleDateString('ne-NP');
+
+            submitBtn.innerText = "सफलतापूर्वक सेभ भयो!";
+            document.getElementById('print-btn').style.display = 'flex';
+            alert("विवरण सफलतापूर्वक सेभ भयो।");
+
+        } catch (error) {
+            console.error(error);
+            alert("डाटा सेभ गर्दा समस्या आयो!");
+            submitBtn.innerText = "💾 विवरण सुरक्षित गरी रसिद बनाउनुहोस्";
+            submitBtn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>
