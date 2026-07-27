@@ -246,9 +246,9 @@
 
         <!-- 2. Vehicle Details Card -->
         <div class="card">
-            <div class="card-title">२. सवारी र चालक विवरण</div>
+            <div class="card-title">२. सवारी विवरण</div>
             <input type="text" id="v-no" class="input-box" placeholder="सवारी साधन नम्बर (उदा: ध १ ख १२३४)">
-            <input type="text" id="l-no" class="input-box" placeholder="चालक अनुमति पत्र नं (License No.)" style="margin-bottom:0;">
+            <input type="text" id="l-no" class="input-box" placeholder="इजाजत पत्र नं (License No.)" style="margin-bottom:0;">
         </div>
 
         <!-- 3. Automated Calculated Information -->
@@ -306,7 +306,7 @@
 
         <div class="receipt-body">
             <p><b>सवारी साधन नम्बर:</b> <span id="p-v-no"></span></p>
-            <p><b>चालक इजाजत पत्र नं:</b> <span id="p-l-no"></span></p>
+            <p><b>इजाजत पत्र नं:</b> <span id="p-l-no"></span></p>
             <p><b>इजाजत दिइएको यात्रा खण्ड:</b> <span id="p-route" style="color:var(--gov-blue);"></span></p>
             <p><b>जम्मा यात्रा दुरी (Map):</b> <span id="p-dist"></span> कि.मी.</p>
             <p><b>प्राप्त राजस्व रकम:</b> रू. <span id="p-amt" class="amount-highlight"></span> /-</p>
@@ -330,7 +330,7 @@
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby56I7wLlSvceeN6prHnCasYspo7aLx27ZiRXLmYJ9yDfSjD_sWhSoHPXqUtjOIxDhk-w/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzrSCAdzh7y7L0FI2B7oxGirns24SB0cqraqpA2OCz8UbJI3cJn83EbXE2M701hvPGvwQ/exec";
 
     var map = L.map('map').setView([28.2721, 83.5901], 10);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
@@ -343,11 +343,7 @@
         geocoder: L.Control.Geocoder.nominatim()
     }).addTo(map);
 
-    // Dynamic 50Km Step Amount Logic:
-    // 0 - 50 km   = 100
-    // 51 - 100 km = 200
-    // 101 - 150 km = 300
-    // 151 - 200 km = 400 ... and so on.
+    // 50Km Step Amount Logic
     control.on('routesfound', function(e) {
         var summary = e.routes[0].summary;
         var distanceKm = parseFloat((summary.totalDistance / 1000).toFixed(2));
@@ -416,7 +412,59 @@
         })
         .addTo(map);
 
-        document.getElementById(id).appendChild(g.getContainer());
+        let container = g.getContainer();
+        document.getElementById(id).appendChild(container);
+
+        // Search Input र OK Button पार्ट
+        let inputEl = container.querySelector('input');
+        if (inputEl) {
+            container.style.display = 'flex';
+            container.style.gap = '6px';
+            container.style.width = '100%';
+            inputEl.style.flex = '1';
+            inputEl.style.padding = '8px 10px';
+            inputEl.style.borderRadius = '6px';
+            inputEl.style.border = '1px solid #CBD5E1';
+
+            let okBtn = document.createElement('button');
+            okBtn.innerText = 'OK';
+            okBtn.type = 'button';
+            okBtn.style.cssText = `
+                background-color: var(--gov-blue);
+                color: white;
+                border: none;
+                padding: 0 14px;
+                border-radius: 6px;
+                font-weight: bold;
+                cursor: pointer;
+                font-size: 13px;
+                transition: background 0.2s;
+            `;
+
+            let triggerSearch = () => {
+                let query = inputEl.value.trim();
+                if (query) {
+                    g.options.geocoder.geocode(query, function(results) {
+                        if (results && results.length > 0) {
+                            g.fire('markgeocode', { geocode: results[0] });
+                        } else {
+                            alert("ठाउँ भेटिएन! कृपया नाम पुन: जाँच गर्नुहोस्।");
+                        }
+                    });
+                }
+            };
+
+            okBtn.onclick = triggerSearch;
+
+            inputEl.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    triggerSearch();
+                }
+            });
+
+            container.appendChild(okBtn);
+        }
     }
 
     setupSearch('search-from');
