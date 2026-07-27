@@ -248,14 +248,28 @@
         <div class="card">
             <div class="card-title">२. सवारी विवरण</div>
             <input type="text" id="v-no" class="input-box" placeholder="सवारी साधन नम्बर (उदा: ध १ ख १२३४)">
-            <input type="text" id="l-no" class="input-box" placeholder="इजाजत पत्र नं (License No.)" style="margin-bottom:0;">
+            <input type="text" id="l-no" class="input-box" placeholder="इजाजत पत्र नं (License No.)">
+            
+            <label class="file-label" style="margin-top:5px;">पटके मान्य दिन (दिन छान्नुहोस् - बढीमा ७ दिन):</label>
+            <select id="valid-days" class="input-box" style="margin-bottom:0;" onchange="updateValidDates()">
+                <option value="1">१ दिनको लागि</option>
+                <option value="2">२ दिनको लागि</option>
+                <option value="3">३ दिनको लागि</option>
+                <option value="4">४ दिनको लागि</option>
+                <option value="5">५ दिनको लागि</option>
+                <option value="6">६ दिनको लागि</option>
+                <option value="7" selected>७ दिनको लागि (अधिकतम)</option>
+            </select>
         </div>
 
         <!-- 3. Automated Calculated Information -->
         <div class="card">
-            <div class="card-title">३. छानिएको रुट तथा राजस्व</div>
+            <div class="card-title">३. छानिएको रुट, समय र राजस्व</div>
             <label class="file-label">छानिएको यात्रा खण्ड:</label>
             <input type="text" id="route-name" class="input-box input-readonly" placeholder="प्रस्थान र गन्तव्य छान्नुहोस्..." readonly>
+
+            <label class="file-label">पटके मान्य अवधि (Valid Date):</label>
+            <input type="text" id="valid-period" class="input-box input-readonly" placeholder="मिति गणना हुँदैछ..." readonly>
             
             <div style="display:flex; gap:12px;">
                 <div style="flex:1;">
@@ -309,6 +323,7 @@
             <p><b>इजाजत पत्र नं:</b> <span id="p-l-no"></span></p>
             <p><b>इजाजत दिइएको यात्रा खण्ड:</b> <span id="p-route" style="color:var(--gov-blue);"></span></p>
             <p><b>जम्मा यात्रा दुरी (Map):</b> <span id="p-dist"></span> कि.मी.</p>
+            <p><b>पटके मान्य अवधि (Valid Date):</b> <span id="p-valid-period" style="color:var(--start-green);"></span></p>
             <p><b>प्राप्त राजस्व रकम:</b> रू. <span id="p-amt" class="amount-highlight"></span> /-</p>
             <p><b>जारी गरिएको मिति:</b> <span id="p-date"></span></p>
         </div>
@@ -330,7 +345,7 @@
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzrSCAdzh7y7L0FI2B7oxGirns24SB0cqraqpA2OCz8UbJI3cJn83EbXE2M701hvPGvwQ/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyjBo4vnswrZeE-Eq5Xpcw5I3FN247LtdglnaxF9wbZo7ZDFZqd_HBw8m2cf4MyrzOlfQ/exec";
 
     var map = L.map('map').setView([28.2721, 83.5901], 10);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
@@ -366,6 +381,22 @@
             control.setWaypoints([fromLatLng, toLatLng]);
         }
     }
+
+    // Dynamic Date Logic for 1 to 7 Days Validity
+    function updateValidDates() {
+        let selectedDays = parseInt(document.getElementById('valid-days').value) || 1;
+        let startDate = new Date();
+        let endDate = new Date();
+        endDate.setDate(startDate.getDate() + (selectedDays - 1));
+
+        let startDateStr = startDate.toISOString().split('T')[0];
+        let endDateStr = endDate.toISOString().split('T')[0];
+
+        document.getElementById('valid-period').value = startDateStr + " देखि " + endDateStr + " सम्म (" + selectedDays + " दिन)";
+    }
+
+    // Call date calculation on load
+    updateValidDates();
 
     function setupSearch(id) {
         let isStart = (id === 'search-from');
@@ -415,55 +446,29 @@
         let container = g.getContainer();
         document.getElementById(id).appendChild(container);
 
-        // Search Input र OK Button पार्ट
+        // Standard Search Input with Enter Key Support (No OK Button)
         let inputEl = container.querySelector('input');
         if (inputEl) {
-            container.style.display = 'flex';
-            container.style.gap = '6px';
-            container.style.width = '100%';
-            inputEl.style.flex = '1';
+            inputEl.style.width = '100%';
             inputEl.style.padding = '8px 10px';
             inputEl.style.borderRadius = '6px';
             inputEl.style.border = '1px solid #CBD5E1';
 
-            let okBtn = document.createElement('button');
-            okBtn.innerText = 'OK';
-            okBtn.type = 'button';
-            okBtn.style.cssText = `
-                background-color: var(--gov-blue);
-                color: white;
-                border: none;
-                padding: 0 14px;
-                border-radius: 6px;
-                font-weight: bold;
-                cursor: pointer;
-                font-size: 13px;
-                transition: background 0.2s;
-            `;
-
-            let triggerSearch = () => {
-                let query = inputEl.value.trim();
-                if (query) {
-                    g.options.geocoder.geocode(query, function(results) {
-                        if (results && results.length > 0) {
-                            g.fire('markgeocode', { geocode: results[0] });
-                        } else {
-                            alert("ठाउँ भेटिएन! कृपया नाम पुन: जाँच गर्नुहोस्।");
-                        }
-                    });
-                }
-            };
-
-            okBtn.onclick = triggerSearch;
-
             inputEl.addEventListener('keydown', function(event) {
                 if (event.key === 'Enter') {
                     event.preventDefault();
-                    triggerSearch();
+                    let query = inputEl.value.trim();
+                    if (query) {
+                        g.options.geocoder.geocode(query, function(results) {
+                            if (results && results.length > 0) {
+                                g.fire('markgeocode', { geocode: results[0] });
+                            } else {
+                                alert("ठाउँ भेटिएन! कृपया नाम पुन: जाँच गर्नुहोस्।");
+                            }
+                        });
+                    }
                 }
             });
-
-            container.appendChild(okBtn);
         }
     }
 
@@ -483,6 +488,7 @@
         const dist = document.getElementById('v-dist').value;
         const route = document.getElementById('route-name').value;
         const amt = document.getElementById('auto-amt').value;
+        const validPeriod = document.getElementById('valid-period').value;
         
         const routePhotoFile = document.getElementById('route-photo').files[0];
         const fitPhotoFile = document.getElementById('fit-photo').files[0];
@@ -501,7 +507,7 @@
             let fitPhotoData = fitPhotoFile ? await fileToBase64(fitPhotoFile) : null;
 
             const payload = {
-                vNo: vNo, lNo: lNo, route: route, dist: dist, amt: amt,
+                vNo: vNo, lNo: lNo, route: route, dist: dist, amt: amt, validPeriod: validPeriod,
                 routePhoto: routePhotoData, fitPhoto: fitPhotoData
             };
 
@@ -517,7 +523,8 @@
             document.getElementById('p-route').innerText = route;
             document.getElementById('p-dist').innerText = dist;
             document.getElementById('p-amt').innerText = amt;
-            document.getElementById('p-date').innerText = new Date().toLocaleDateString('ne-NP');
+            document.getElementById('p-valid-period').innerText = validPeriod;
+            document.getElementById('p-date').innerText = new Date().toISOString().split('T')[0];
 
             submitBtn.innerText = "सफलतापूर्वक सेभ भयो!";
             document.getElementById('print-btn').style.display = 'flex';
