@@ -11,7 +11,6 @@
         body { margin: 0; background: var(--bg); color: #0F172A; }
         .header { background: #fff; padding: 15px 20px; border-bottom: 2px solid var(--gov-red); text-align: center; }
         .header h2 { margin: 0; color: var(--gov-blue); font-size: 20px; }
-        .header p { margin: 2px 0 0 0; color: var(--gov-red); font-weight: bold; font-size: 14px; }
         .container { max-width: 600px; margin: 20px auto; padding: 0 15px; }
         .card { background: #fff; padding: 18px; border-radius: 10px; border: 1px solid #E2E8F0; margin-bottom: 15px; }
         .card-title { font-weight: 800; color: var(--gov-blue); margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
@@ -20,7 +19,12 @@
         input, select { width: 100%; padding: 10px; border: 1px solid #CBD5E1; border-radius: 6px; outline: none; }
         .readonly-box { background: #F1F5F9; font-weight: bold; }
         .btn { width: 100%; padding: 12px; background: var(--gov-blue); color: #fff; border: none; border-radius: 6px; font-weight: 700; font-size: 16px; cursor: pointer; }
+        .btn-check { background: #0284C7; margin-top: 10px; }
         .btn-print { background: #059669; margin-top: 10px; display: none; }
+        .status-badge { display: inline-block; padding: 5px 10px; border-radius: 4px; font-weight: bold; }
+        .status-Pending { background: #FEF08A; color: #854D0E; }
+        .status-Approved { background: #BBF7D0; color: #166534; }
+        .status-Rejected { background: #FECDD3; color: #991B1B; }
         @media print { .no-print { display: none !important; } .print-area { display: block !important; } }
         .print-area { display: none; padding: 20px; border: 2px solid var(--gov-blue); border-radius: 8px; background: white; }
     </style>
@@ -33,6 +37,17 @@
 </div>
 
 <div class="container no-print">
+    <!-- Check Application Status -->
+    <div class="card" style="background: #EFF6FF;">
+        <div class="card-title">🔍 आवेदनको स्थिति जाँच्नुहोस्</div>
+        <div class="form-group">
+            <input type="text" id="search-vno" placeholder="सवारी साधन नं हाल्नुहोस् (उदा: ध १ ख १२३४)">
+        </div>
+        <button class="btn btn-check" onclick="checkStatus()">स्थिति हेर्नुहोस् / रसिद प्रिन्ट</button>
+        <div id="status-result" style="margin-top: 10px; font-weight: bold;"></div>
+    </div>
+
+    <!-- Application Form -->
     <div class="card">
         <div class="card-title">१. रुट छनौट</div>
         <div class="form-group">
@@ -64,14 +79,15 @@
     </div>
 
     <button id="submit-btn" class="btn" onclick="submitPublicForm()">📤 विवरण बुझाउनुहोस्</button>
-    <button id="print-btn" class="btn btn-print" onclick="window.print()">🖨️ रसिद प्रिन्ट गर्नुहोस्</button>
+    <button id="print-btn" class="btn btn-print" onclick="window.print()">🖨️ स्वीकृत रसिद प्रिन्ट गर्नुहोस्</button>
 </div>
 
-<!-- Receipt Template for Print -->
+<!-- Receipt Printable Format -->
 <div class="print-area">
     <h3 style="text-align:center; color:var(--gov-blue); margin:0;">यातायात व्यवस्था कार्यालय, बागलुङ</h3>
-    <h4 style="text-align:center; margin:5px 0 15px 0;">पटके यात्रा इजाजत–पत्र (Public Receipt)</h4>
+    <h4 style="text-align:center; margin:5px 0 15px 0;">पटके यात्रा इजाजत–पत्र (Official Receipt)</h4>
     <hr>
+    <p><b>स्थिति:</b> <span style="color:green; font-weight:bold;">APPROVED (स्वीकृत)</span></p>
     <p><b>सवारी साधन नम्बर:</b> <span id="p-vno"></span></p>
     <p><b>इजाजत पत्र नं:</b> <span id="p-lno"></span></p>
     <p><b>रुट:</b> <span id="p-route"></span></p>
@@ -80,8 +96,7 @@
 </div>
 
 <script>
-    // यहाँ आफ्नो GOOGLE APPS SCRIPT WEB APP URL राख्नुहोस्
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwxmhQD8Hm_qsHmWZhWMxG4ZvOvURfmcFISxk9VKmwQC3Cm1kwFTRVnUIMl1h_jFl0iIw/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyjSOGqaIHZosAdh2cIT9AGEuTPS-G0CdtYSPXyaPn95uGT1OViN3rdtq-aaoxF7c7_hg/exec";
 
     const routeData = [
         { from: "muktinath", to: "baglung", km: 107 },
@@ -114,8 +129,7 @@
         const uniqueFrom = [...new Set(routeData.map(item => item.from))].sort();
         uniqueFrom.forEach(f => {
             let opt = document.createElement('option');
-            opt.value = f; 
-            opt.textContent = f.toUpperCase();
+            opt.value = f; opt.textContent = f.toUpperCase();
             fromSelect.appendChild(opt);
         });
     }
@@ -125,11 +139,9 @@
         const toSel = document.getElementById('to-select');
         toSel.innerHTML = '<option value="">-- छान्नुहोस् --</option>';
         if(!sel) { toSel.disabled = true; return; }
-        
         routeData.filter(i => i.from === sel).forEach(i => {
             let opt = document.createElement('option');
-            opt.value = i.to; 
-            opt.textContent = i.to.toUpperCase() + ` (${i.km} Km)`;
+            opt.value = i.to; opt.textContent = i.to.toUpperCase() + ` (${i.km} Km)`;
             opt.dataset.km = i.km;
             toSel.appendChild(opt);
         });
@@ -145,8 +157,7 @@
     }
 
     const fileToBase64 = file => new Promise((res, rej) => {
-        const reader = new FileReader(); 
-        reader.readAsDataURL(file);
+        const reader = new FileReader(); reader.readAsDataURL(file);
         reader.onload = () => res({ data: reader.result.split(',')[1], type: file.type });
         reader.onerror = err => rej(err);
     });
@@ -159,14 +170,10 @@
         const routeFile = document.getElementById('route-photo').files[0];
         const fitFile = document.getElementById('fit-photo').files[0];
 
-        if(!vNo || !lNo || !route) { 
-            alert("कृपया सम्पूर्ण विवरण भर्नुहोस्!"); 
-            return; 
-        }
+        if(!vNo || !lNo || !route) { alert("कृपया सम्पूर्ण विवरण भर्नुहोस्!"); return; }
 
         const btn = document.getElementById('submit-btn');
-        btn.innerText = "पठाउँदैछ..."; 
-        btn.disabled = true;
+        btn.innerText = "पठाउँदैछ..."; btn.disabled = true;
 
         try {
             let routeP = routeFile ? await fileToBase64(routeFile) : null;
@@ -175,15 +182,10 @@
             const payload = {
                 action: "submitForm",
                 date: new Date().toLocaleDateString('ne-NP'),
-                vNo: vNo, 
-                lNo: lNo, 
-                route: route, 
-                dist: dist,
-                routePhoto: routeP, 
-                fitPhoto: fitP
+                vNo: vNo, lNo: lNo, route: route, dist: dist,
+                routePhoto: routeP, fitPhoto: fitP
             };
 
-            // Using text/plain header to bypass browser CORS restriction
             await fetch(SCRIPT_URL, { 
                 method: 'POST', 
                 mode: 'no-cors', 
@@ -191,20 +193,42 @@
                 body: JSON.stringify(payload) 
             });
 
-            document.getElementById('p-vno').innerText = vNo;
-            document.getElementById('p-lno').innerText = lNo;
-            document.getElementById('p-route').innerText = route;
-            document.getElementById('p-dist').innerText = dist;
-            document.getElementById('p-date').innerText = payload.date;
-
-            btn.innerText = "सफलतापूर्वक बुझाइयो!";
-            document.getElementById('print-btn').style.display = 'block';
-            alert("तपाईँको विवरण अनलाइन दर्ता भयो। रसिद प्रिन्ट गर्न सक्नुहुन्छ।");
+            alert("तपाईँको विवरण सफलतापुर्वक बुझाइयो! कार्यालयबाट स्वीकृत (Approve) भएपछि रसिद प्रिन्ट गर्न सकिनेछ।");
+            btn.innerText = "📤 विवरण बुझाउनुहोस्"; btn.disabled = false;
         } catch (e) {
-            console.error(e);
-            alert("त्रुटि भयो! कृपया SCRIPT_URL र इन्टरनेट जाँच्नुहोस्।");
-            btn.innerText = "📤 विवरण बुझाउनुहोस्"; 
-            btn.disabled = false;
+            alert("त्रुटि भयो!"); btn.innerText = "📤 विवरण बुझाउनुहोस्"; btn.disabled = false;
+        }
+    }
+
+    async function checkStatus() {
+        const searchVNo = document.getElementById('search-vno').value.trim();
+        const resDiv = document.getElementById('status-result');
+        const printBtn = document.getElementById('print-btn');
+        printBtn.style.display = 'none';
+
+        if(!searchVNo) { alert("कृपया सवारी नम्बर हाल्नुहोस्"); return; }
+        resDiv.innerText = "खोज्दैछ...";
+
+        try {
+            const res = await fetch(SCRIPT_URL);
+            const data = await res.json();
+            const record = data.find(r => r.vNo.toString().trim().toLowerCase() === searchVNo.toLowerCase());
+
+            if(record) {
+                resDiv.innerHTML = `स्थिति: <span class="status-badge status-${record.status}">${record.status}</span>`;
+                if(record.status === 'Approved') {
+                    document.getElementById('p-vno').innerText = record.vNo;
+                    document.getElementById('p-lno').innerText = record.lNo;
+                    document.getElementById('p-route').innerText = record.route;
+                    document.getElementById('p-dist').innerText = record.dist;
+                    document.getElementById('p-date').innerText = record.date;
+                    printBtn.style.display = 'block';
+                }
+            } else {
+                resDiv.innerText = "कुनै विवरण भेटिएन।";
+            }
+        } catch(e) {
+            resDiv.innerText = "त्रुटि भयो!";
         }
     }
 
