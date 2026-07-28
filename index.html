@@ -5,14 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>यातायात व्यवस्था कार्यालय, बागलुङ - पटके प्रणाली</title>
     
-    <!-- Google Fonts & Leaflet Libraries -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Mukta:wght@400;600;700;800&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
     
     <style>
         :root { 
@@ -27,98 +22,72 @@
         }
         
         * { box-sizing: border-box; font-family: 'Mukta', 'Inter', sans-serif; }
-        body, html { margin: 0; padding: 0; height: 100%; background: var(--bg-slate); color: var(--text-main); }
+        body, html { margin: 0; padding: 0; min-height: 100vh; background: var(--bg-slate); color: var(--text-main); }
         
-        .top-stripe { height: 4px; background: linear-gradient(90deg, var(--gov-red) 0%, #F43F5E 50%, var(--gov-blue) 100%); }
+        .top-stripe { height: 5px; background: linear-gradient(90deg, var(--gov-red) 0%, #F43F5E 50%, var(--gov-blue) 100%); }
 
-        /* Modern Header */
         .header { 
             background: #FFFFFF; 
-            padding: 10px 28px; 
+            padding: 12px 30px; 
             display: flex; 
             align-items: center; 
             justify-content: space-between;
             border-bottom: 1px solid var(--card-border);
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
-            z-index: 1002; 
+            box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.05);
         }
         .header-left { display: flex; align-items: center; gap: 16px; }
-        .header-left .gov-logo { height: 65px; width: auto; object-fit: contain; }
-        .header-title h3 { margin: 0; font-size: 13px; color: var(--gov-red); font-weight: 700; letter-spacing: 0.2px; }
-        .header-title h1 { margin: 0; font-size: 20px; font-weight: 800; color: var(--gov-blue); line-height: 1.2; }
+        .header-left .gov-logo { height: 70px; width: auto; object-fit: contain; }
+        .header-title h3 { margin: 0; font-size: 13px; color: var(--gov-red); font-weight: 700; }
+        .header-title h1 { margin: 0; font-size: 22px; font-weight: 800; color: var(--gov-blue); line-height: 1.2; }
         .header-title p { margin: 0; font-size: 13px; font-weight: 600; color: var(--text-muted); }
 
         .system-badge {
             background: #EFF6FF;
             color: var(--gov-blue-light);
-            padding: 6px 14px;
+            padding: 6px 16px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 700;
             border: 1px solid #BFDBFE;
         }
 
-        /* Sidebar & Map Grid */
-        .main-view { display: flex; height: calc(100vh - 89px); }
-        .sidebar { 
-            width: 440px; 
-            background: #FFFFFF; 
-            padding: 20px; 
-            border-right: 1px solid var(--card-border);
-            z-index: 1001; 
-            overflow-y: auto; 
+        .container {
+            max-width: 900px;
+            margin: 25px auto;
+            padding: 0 20px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 18px;
         }
-        #map { flex: 1; height: 100%; z-index: 1; }
         
-        /* Cards */
         .card { 
             background: #FFFFFF; 
             border: 1px solid var(--card-border); 
             border-radius: 12px; 
-            padding: 16px; 
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
-            transition: all 0.2s ease-in-out;
+            padding: 20px; 
+            box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.02);
         }
         
         .card-title { 
-            font-size: 15px; 
+            font-size: 16px; 
             font-weight: 800; 
-            color: var(--text-main); 
-            margin-bottom: 12px; 
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            color: var(--gov-blue); 
+            margin-bottom: 14px; 
+            border-bottom: 2px solid #F1F5F9;
+            padding-bottom: 6px;
         }
 
-        .search-box-group { display: flex; flex-direction: column; gap: 10px; }
-
-        .search-container {
-            border: 1px solid var(--card-border);
-            padding: 10px;
-            border-radius: 8px;
-            background: #F8FAFC;
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
         }
 
-        .route-label {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
-            font-weight: 700;
-            margin-bottom: 6px;
-        }
-        .text-start { color: var(--start-green); }
-        .text-end { color: var(--gov-red); }
-
-        .input-box { 
+        .input-box, select.input-box { 
             width: 100%; 
             padding: 10px 14px; 
             border: 1px solid var(--card-border); 
             border-radius: 8px; 
-            margin-bottom: 10px; 
             font-size: 14px;
             outline: none;
             background: #FFFFFF;
@@ -144,18 +113,17 @@
             font-size: 16px;
         }
         
-        .file-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .file-label { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; display: block; }
+        .file-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .file-label { font-size: 13px; font-weight: 700; color: var(--text-muted); margin-bottom: 5px; display: block; }
 
-        /* Buttons */
         .btn { 
             border: none; 
-            padding: 13px; 
+            padding: 14px; 
             border-radius: 8px; 
             font-weight: 700; 
             cursor: pointer; 
             width: 100%; 
-            font-size: 15px; 
+            font-size: 16px; 
             transition: all 0.2s ease-in-out; 
             display: flex;
             align-items: center;
@@ -167,9 +135,8 @@
         .btn-blue:hover { background: #1E40AF; transform: translateY(-1px); }
         .btn-green { background: var(--start-green); color: white; margin-top: 10px; }
 
-        /* Printable Receipt */
         @media print { 
-            .no-print, #map, .sidebar, .header, .top-stripe { display: none !important; } 
+            .no-print, .container, .header, .top-stripe { display: none !important; } 
             .print-document { display: block !important; } 
         }
         .print-document { 
@@ -226,32 +193,42 @@
     </div>
 </div>
 
-<div class="main-view no-print">
-    <div class="sidebar">
-        <!-- 1. Route Selection Card -->
-        <div class="card">
-            <div class="card-title">१. यात्रा रुट छनौट</div>
-            <div class="search-box-group">
-                <div class="search-container" style="border-left: 3px solid var(--start-green);">
-                    <span class="route-label text-start">📍 प्रस्थान विन्दु (Start Point)</span>
-                    <div id="search-from"></div>
-                </div>
-
-                <div class="search-container" style="border-left: 3px solid var(--gov-red);">
-                    <span class="route-label text-end">🏁 गन्तव्य विन्दु (Destination)</span>
-                    <div id="search-to"></div>
-                </div>
+<div class="container no-print">
+    <!-- 1. Route Selection Card -->
+    <div class="card">
+        <div class="card-title">१. यात्रा रुट छनौट (स्थानको सूचीबाट छान्नुहोस्)</div>
+        <div class="input-grid">
+            <div>
+                <label class="file-label" style="color:var(--start-green);">📍 प्रस्थान विन्दु (FROM):</label>
+                <select id="from-select" class="input-box" onchange="onFromChange()">
+                    <option value="">-- प्रस्थान विन्दु छान्नुहोस् --</option>
+                </select>
+            </div>
+            <div>
+                <label class="file-label" style="color:var(--gov-red);">🏁 गन्तव्य विन्दु (TO):</label>
+                <select id="to-select" class="input-box" onchange="onToChange()" disabled>
+                    <option value="">-- पहिले प्रस्थान विन्दु छान्नुहोस् --</option>
+                </select>
             </div>
         </div>
+    </div>
 
-        <!-- 2. Vehicle Details Card -->
-        <div class="card">
-            <div class="card-title">२. सवारी विवरण</div>
-            <input type="text" id="v-no" class="input-box" placeholder="सवारी साधन नम्बर (उदा: ध १ ख १२३४)">
-            <input type="text" id="l-no" class="input-box" placeholder="इजाजत पत्र नं (License No.)">
-            
-            <label class="file-label" style="margin-top:5px;">पटके मान्य दिन (बढीमा ७ दिन):</label>
-            <select id="valid-days" class="input-box" style="margin-bottom:0;" onchange="updateValidDatesBS()">
+    <!-- 2. Vehicle Details Card -->
+    <div class="card">
+        <div class="card-title">२. सवारी विवरण तथा मान्य अवधि</div>
+        <div class="input-grid">
+            <div>
+                <label class="file-label">सवारी साधन नम्बर:</label>
+                <input type="text" id="v-no" class="input-box" placeholder="उदा: ध १ ख १२३४">
+            </div>
+            <div>
+                <label class="file-label">इजाजत पत्र नं (License No.):</label>
+                <input type="text" id="l-no" class="input-box" placeholder="इजाजत पत्र नं लेख्नुहोस्">
+            </div>
+        </div>
+        <div style="margin-top: 12px;">
+            <label class="file-label">पटके मान्य दिन (बढीमा ७ दिन):</label>
+            <select id="valid-days" class="input-box" onchange="updateValidDatesBS()">
                 <option value="1">१ दिनको लागि</option>
                 <option value="2">२ दिनको लागि</option>
                 <option value="3">३ दिनको लागि</option>
@@ -261,50 +238,50 @@
                 <option value="7" selected>७ दिनको लागि (अधिकतम)</option>
             </select>
         </div>
+    </div>
 
-        <!-- 3. Automated Calculated Information -->
-        <div class="card">
-            <div class="card-title">३. छानिएको रुट, समय र राजस्व</div>
+    <!-- 3. Automated Calculated Information -->
+    <div class="card">
+        <div class="card-title">३. छानिएको रुट, समय र राजस्व</div>
+        <div style="margin-bottom: 12px;">
             <label class="file-label">छानिएको यात्रा खण्ड:</label>
             <input type="text" id="route-name" class="input-box input-readonly" placeholder="प्रस्थान र गन्तव्य छान्नुहोस्..." readonly>
-
+        </div>
+        <div style="margin-bottom: 12px;">
             <label class="file-label">पटके मान्य अवधि (वि.सं. / BS Date):</label>
             <input type="text" id="valid-period" class="input-box input-readonly" placeholder="मिति गणना हुँदैछ..." readonly>
-            
-            <div style="display:flex; gap:12px;">
-                <div style="flex:1;">
-                    <label class="file-label">दुरी (Km):</label>
-                    <input type="text" id="v-dist" class="input-box input-readonly" placeholder="0 Km" readonly style="margin-bottom:0;">
-                </div>
-                <div style="flex:1;">
-                    <label class="file-label">राजस्व रकम:</label>
-                    <input type="text" id="auto-amt" class="input-box" placeholder="रू. 0" readonly style="margin-bottom:0;">
-                </div>
-            </div>
         </div>
-
-        <!-- 4. Document Upload Card -->
-        <div class="card">
-            <div class="card-title">४. कागजात अपलोड (Drive)</div>
-            <div class="file-grid">
-                <div>
-                    <span class="file-label">रुट पर्मिट फोटो:</span>
-                    <input type="file" id="route-photo" class="input-box" accept="image/*" style="font-size:11px; margin-bottom:0;">
-                </div>
-                <div>
-                    <span class="file-label">जाँचपास फोटो:</span>
-                    <input type="file" id="fit-photo" class="input-box" accept="image/*" style="font-size:11px; margin-bottom:0;">
-                </div>
+        <div class="input-grid">
+            <div>
+                <label class="file-label">दुरी (Km):</label>
+                <input type="text" id="v-dist" class="input-box input-readonly" placeholder="0 Km" readonly>
             </div>
-        </div>
-
-        <div>
-            <button id="submit-btn" class="btn btn-blue" onclick="prepareAndSaveData()">💾 विवरण सुरक्षित गरी रसिद बनाउनुहोस्</button>
-            <button id="print-btn" class="btn btn-green" style="display:none;" onclick="window.print()">🖨️ रसिद प्रिन्ट गर्नुहोस्</button>
+            <div>
+                <label class="file-label">राजस्व रकम:</label>
+                <input type="text" id="auto-amt" class="input-box input-readonly" placeholder="रू. 0" readonly>
+            </div>
         </div>
     </div>
-    
-    <div id="map"></div>
+
+    <!-- 4. Document Upload Card -->
+    <div class="card">
+        <div class="card-title">४. कागजात अपलोड (Drive)</div>
+        <div class="file-grid">
+            <div>
+                <span class="file-label">रुट पर्मिट फोटो:</span>
+                <input type="file" id="route-photo" class="input-box" accept="image/*" style="font-size:12px;">
+            </div>
+            <div>
+                <span class="file-label">जाँचपास फोटो:</span>
+                <input type="file" id="fit-photo" class="input-box" accept="image/*" style="font-size:12px;">
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <button id="submit-btn" class="btn btn-blue" onclick="prepareAndSaveData()">💾 विवरण सुरक्षित गरी रसिद बनाउनुहोस्</button>
+        <button id="print-btn" class="btn btn-green" style="display:none;" onclick="window.print()">🖨️ रसिद प्रिन्ट गर्नुहोस्</button>
+    </div>
 </div>
 
 <!-- PRINT RECEIPT TEMPLATE -->
@@ -322,7 +299,7 @@
             <p><b>सवारी साधन नम्बर:</b> <span id="p-v-no"></span></p>
             <p><b>इजाजत पत्र नं:</b> <span id="p-l-no"></span></p>
             <p><b>इजाजत दिइएको यात्रा खण्ड:</b> <span id="p-route" style="color:var(--gov-blue);"></span></p>
-            <p><b>जम्मा यात्रा दुरी (Map):</b> <span id="p-dist"></span> कि.मी.</p>
+            <p><b>जम्मा यात्रा दुरी:</b> <span id="p-dist"></span> कि.मी.</p>
             <p><b>पटके मान्य अवधि (वि.सं.):</b> <span id="p-valid-period" style="color:var(--start-green);"></span></p>
             <p><b>प्राप्त राजस्व रकम:</b> रू. <span id="p-amt" class="amount-highlight"></span> /-</p>
             <p><b>जारी गरिएको मिति (वि.सं.):</b> <span id="p-date"></span></p>
@@ -340,87 +317,125 @@
     </div>
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
-<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
-
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxnp6lHph-YkDvW6eIB3Y78Abx7_kUdmirO8H5Or7InPTDwtO9tLhl3eyqlI84iXTvs/exec";
+    // TAPPIKO WEB APP URL YAHAN RAKHNUHOS
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzvrnmzsHyjMET9eMpoLuouYv9WiqndiP--vHkl8Ea136w5H4qHXwQ3zV6nHdxKYiJRig/exec";
 
-    var map = L.map('map').setView([28.2721, 83.5901], 10);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    const routeData = [
+        { from: "baglung", to: "muktinath", km: 107 },
+        { from: "baglung", to: "korola boarder", km: 211 },
+        { from: "muglin", to: "muktinath", km: 264 },
+        { from: "muglin", to: "korola boarder", km: 357 },
+        { from: "kharbang", to: "butwal", km: 144 },
+        { from: "kharbang", to: "suppadeurali", km: 142 },
+        { from: "baglung", to: "suppadeurali", km: 147 },
+        { from: "ramdi", to: "butwal", km: 62 },
+        { from: "burtibang", to: "rukumkot", km: 89 },
+        { from: "burtibang", to: "khalanga rukum west", km: 106 },
+        { from: "kharbang", to: "tamghas", km: 38 },
+        { from: "baglung", to: "dhopatan", km: 130 },
+        { from: "belbagar baglung", to: "butwal", km: 176 },
+        { from: "baglung", to: "beni", km: 26 },
+        { from: "baglung", to: "singha tatopani", km: 38 },
+        { from: "baglung", to: "bhurung tatopani", km: 70 },
+        { from: "baglung", to: "narayanghat", km: 202 },
+        { from: "baglung", to: "kathmandu", km: 278 },
+        { from: "muglin", to: "kathmandu", km: 110 },
+        { from: "baglung", to: "galkot", km: 54 },
+        { from: "baglung", to: "tamghas", km: 103 },
+        { from: "baglung", to: "palpa", km: 136 },
+        { from: "baglung", to: "ridi", km: 85 }
+    ];
 
-    let fromLatLng = null, toLatLng = null, routeFrom = "", routeTo = "";
-    let fromMarker = null, toMarker = null;
-
-    var control = L.Routing.control({
-        waypoints: [], routeWhileDragging: false, show: false,
-        geocoder: L.Control.Geocoder.nominatim()
-    }).addTo(map);
-
-    // 50Km Step Amount Logic
-    control.on('routesfound', function(e) {
-        var summary = e.routes[0].summary;
-        var distanceKm = parseFloat((summary.totalDistance / 1000).toFixed(2));
-        document.getElementById('v-dist').value = distanceKm + " Km";
+    function initRoutes() {
+        const fromSelect = document.getElementById('from-select');
+        const uniqueFrom = [...new Set(routeData.map(item => item.from))].sort();
         
-        let amount = 0;
-        if (distanceKm > 0) {
-            amount = Math.ceil(distanceKm / 50) * 100;
-        }
-        
-        document.getElementById('auto-amt').value = "रू. " + amount;
-
-        if(routeFrom && routeTo) {
-            document.getElementById('route-name').value = routeFrom + " ➔ " + routeTo;
-        }
-    });
-
-    function autoCalculateRouteIfReady() {
-        if (fromLatLng && toLatLng) {
-            control.setWaypoints([fromLatLng, toLatLng]);
-        }
+        uniqueFrom.forEach(fromLoc => {
+            let opt = document.createElement('option');
+            opt.value = fromLoc;
+            opt.textContent = capitalizeFirst(fromLoc);
+            fromSelect.appendChild(opt);
+        });
     }
 
-    // --- AD to BS Date Converter Utility ---
+    function capitalizeFirst(str) {
+        return str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    }
+
+    function onFromChange() {
+        const selectedFrom = document.getElementById('from-select').value;
+        const toSelect = document.getElementById('to-select');
+        
+        toSelect.innerHTML = '<option value="">-- गन्तव्य विन्दु छान्नुहोस् --</option>';
+        document.getElementById('v-dist').value = "0 Km";
+        document.getElementById('auto-amt').value = "रू. 0";
+        document.getElementById('route-name').value = "";
+
+        if (!selectedFrom) {
+            toSelect.disabled = true;
+            return;
+        }
+
+        const filteredTargets = routeData.filter(item => item.from === selectedFrom);
+        filteredTargets.forEach(item => {
+            let opt = document.createElement('option');
+            opt.value = item.to;
+            opt.textContent = capitalizeFirst(item.to) + ` (${item.km} Km)`;
+            opt.dataset.km = item.km;
+            toSelect.appendChild(opt);
+        });
+
+        toSelect.disabled = false;
+    }
+
+    function onToChange() {
+        const fromSelect = document.getElementById('from-select');
+        const toSelect = document.getElementById('to-select');
+        const selectedOption = toSelect.options[toSelect.selectedIndex];
+
+        if (!toSelect.value) {
+            document.getElementById('v-dist').value = "0 Km";
+            document.getElementById('auto-amt').value = "रू. 0";
+            document.getElementById('route-name').value = "";
+            return;
+        }
+
+        const km = parseFloat(selectedOption.dataset.km);
+        const fromName = capitalizeFirst(fromSelect.value);
+        const toName = capitalizeFirst(toSelect.value);
+
+        document.getElementById('route-name').value = fromName + " ➔ " + toName;
+        document.getElementById('v-dist').value = km + " Km";
+
+        let amount = Math.ceil(km / 50) * 100;
+        document.getElementById('auto-amt').value = "रू. " + amount;
+    }
+
     const bsCalendarData = {
-        2083: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], // Days in months for 2083 BS
+        2083: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
         2084: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30]
     };
 
-    // Convert JS Date object to BS Date Array [YYYY, MM, DD]
     function convertADToBS(adDate) {
-        // Reference point: 2026-07-27 AD = 2083-04-12 BS
-        let refAD = new Date(2026, 6, 27); // Month index 6 = July
+        let refAD = new Date(2026, 6, 27); 
         let refBS = { y: 2083, m: 4, d: 12 };
         
-        let diffTime = adDate.getTime() - refAD.getTime();
-        let diffDays = Math.floor(diffTime / (1000 * 3600 * 24));
+        let diffDays = Math.floor((adDate.getTime() - refAD.getTime()) / (1000 * 3600 * 24));
         
-        let curY = refBS.y;
-        let curM = refBS.m;
-        let curD = refBS.d + diffDays;
+        let curY = refBS.y, curM = refBS.m, curD = refBS.d + diffDays;
 
         while (true) {
             let monthDays = bsCalendarData[curY] ? bsCalendarData[curY][curM - 1] : 30;
             if (curD > monthDays) {
                 curD -= monthDays;
                 curM++;
-                if (curM > 12) {
-                    curM = 1;
-                    curY++;
-                }
+                if (curM > 12) { curM = 1; curY++; }
             } else if (curD < 1) {
                 curM--;
-                if (curM < 1) {
-                    curM = 12;
-                    curY--;
-                }
-                let prevMonthDays = bsCalendarData[curY] ? bsCalendarData[curY][curM - 1] : 30;
-                curD += prevMonthDays;
-            } else {
-                break;
-            }
+                if (curM < 1) { curM = 12; curY--; }
+                curD += (bsCalendarData[curY] ? bsCalendarData[curY][curM - 1] : 30);
+            } else { break; }
         }
 
         let mStr = curM < 10 ? '0' + curM : curM;
@@ -428,10 +443,8 @@
         return `${curY}/${mStr}/${dStr}`;
     }
 
-    // Dynamic BS Date Calculation for Selected Days (Up to 7 Days)
     function updateValidDatesBS() {
         let selectedDays = parseInt(document.getElementById('valid-days').value) || 1;
-        
         let startDateAD = new Date();
         let endDateAD = new Date();
         endDateAD.setDate(startDateAD.getDate() + (selectedDays - 1));
@@ -442,84 +455,10 @@
         document.getElementById('valid-period').value = startBS + " देखि " + endBS + " सम्म (" + selectedDays + " दिन)";
     }
 
-    // Call BS date calculation on page load
-    updateValidDatesBS();
-
-    function setupSearch(id) {
-        let isStart = (id === 'search-from');
-        let placeholderText = isStart ? "प्रस्थान विन्दु खोज्नुहोस्..." : "गन्तव्य विन्दु खोज्नुहोस्...";
-
-        let g = L.Control.geocoder({ 
-            defaultMarkGeocode: false, 
-            placeholder: placeholderText,
-            geocoder: L.Control.Geocoder.nominatim({
-                geocodingQueryParams: {
-                    'countrycodes': 'np',
-                    'limit': 5,
-                    'accept-language': 'ne,en'
-                }
-            })
-        })
-        .on('markgeocode', function(e) {
-            let locName = e.geocode.name.split(',')[0];
-            
-            if(isStart) { 
-                fromLatLng = e.geocode.center; 
-                routeFrom = locName; 
-                if(fromMarker) map.removeLayer(fromMarker);
-                fromMarker = L.marker(fromLatLng).addTo(map)
-                    .bindPopup("<b style='color:#059669;'>📍 प्रस्थान विन्दु:</b><br>" + locName).openPopup();
-            } else { 
-                toLatLng = e.geocode.center; 
-                routeTo = locName; 
-                if(toMarker) map.removeLayer(toMarker);
-                toMarker = L.marker(toLatLng).addTo(map)
-                    .bindPopup("<b style='color:#E11D48;'>🏁 गन्तव्य विन्दु:</b><br>" + locName).openPopup();
-            }
-
-            if(routeFrom && routeTo) {
-                document.getElementById('route-name').value = routeFrom + " ➔ " + routeTo;
-            } else if(routeFrom) {
-                document.getElementById('route-name').value = routeFrom + " ➔ ...";
-            } else if(routeTo) {
-                document.getElementById('route-name').value = "... ➔ " + routeTo;
-            }
-
-            map.setView(e.geocode.center, 12);
-            autoCalculateRouteIfReady();
-        })
-        .addTo(map);
-
-        let container = g.getContainer();
-        document.getElementById(id).appendChild(container);
-
-        let inputEl = container.querySelector('input');
-        if (inputEl) {
-            inputEl.style.width = '100%';
-            inputEl.style.padding = '8px 10px';
-            inputEl.style.borderRadius = '6px';
-            inputEl.style.border = '1px solid #CBD5E1';
-
-            inputEl.addEventListener('keydown', function(event) {
-                if (event.key === 'Enter') {
-                    event.preventDefault();
-                    let query = inputEl.value.trim();
-                    if (query) {
-                        g.options.geocoder.geocode(query, function(results) {
-                            if (results && results.length > 0) {
-                                g.fire('markgeocode', { geocode: results[0] });
-                            } else {
-                                alert("ठाउँ भेटिएन! कृपया नाम पुन: जाँच गर्नुहोस्।");
-                            }
-                        });
-                    }
-                }
-            });
-        }
-    }
-
-    setupSearch('search-from');
-    setupSearch('search-to');
+    window.onload = function() {
+        initRoutes();
+        updateValidDatesBS();
+    };
 
     const fileToBase64 = file => new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -535,12 +474,13 @@
         const route = document.getElementById('route-name').value;
         const amt = document.getElementById('auto-amt').value;
         const validPeriod = document.getElementById('valid-period').value;
-        
+        const todayBS = convertADToBS(new Date());
+
         const routePhotoFile = document.getElementById('route-photo').files[0];
         const fitPhotoFile = document.getElementById('fit-photo').files[0];
 
-        if(!vNo || !lNo || !dist) { 
-            alert("कृपया सबै विवरण भर्नुहोस् र नक्सामा दुवै ठाउँ छान्नुहोस्!"); 
+        if(!vNo || !lNo || dist === "0 Km" || !route) { 
+            alert("कृपया सबै विवरण भर्नुहोस् र प्रस्थान/गन्तव्य ठाउँ छान्नुहोस्!"); 
             return; 
         }
 
@@ -552,9 +492,15 @@
             let routePhotoData = routePhotoFile ? await fileToBase64(routePhotoFile) : null;
             let fitPhotoData = fitPhotoFile ? await fileToBase64(fitPhotoFile) : null;
 
+            // Send payload matching Sheet columns (A-G)
             const payload = {
-                vNo: vNo, lNo: lNo, route: route, dist: dist, amt: amt, validPeriod: validPeriod,
-                routePhoto: routePhotoData, fitPhoto: fitPhotoData
+                date: todayBS,
+                vNo: vNo,
+                lNo: lNo,
+                route: route,
+                dist: dist,
+                routePhoto: routePhotoData,
+                fitPhoto: fitPhotoData
             };
 
             await fetch(SCRIPT_URL, {
@@ -563,8 +509,6 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-
-            let todayBS = convertADToBS(new Date());
 
             document.getElementById('p-v-no').innerText = vNo;
             document.getElementById('p-l-no').innerText = lNo;
@@ -576,7 +520,7 @@
 
             submitBtn.innerText = "सफलतापूर्वक सेभ भयो!";
             document.getElementById('print-btn').style.display = 'flex';
-            alert("विवरण सफलतापूर्वक सेभ भयो।");
+            alert("विवरण Google Sheet मा सफलतापूर्वक सेभ भयो।");
 
         } catch (error) {
             console.error(error);
