@@ -3,532 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>यातायात व्यवस्था कार्यालय, बागलुङ - पटके प्रणाली</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Mukta:wght@400;600;700;800&display=swap" rel="stylesheet">
-    
+    <title>नागरिक सेवा - अनलाइन पटके दर्ता</title>
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --gov-red: #E11D48; 
-            --gov-blue: #1E3A8A; 
-            --gov-blue-light: #2563EB;
-            --bg-slate: #F8FAFC; 
-            --card-border: #E2E8F0;
-            --text-main: #0F172A;
-            --text-muted: #64748B;
-            --start-green: #059669;
-        }
-        
-        * { box-sizing: border-box; font-family: 'Mukta', 'Inter', sans-serif; }
-        body, html { margin: 0; padding: 0; min-height: 100vh; background: var(--bg-slate); color: var(--text-main); }
-        
-        .top-stripe { height: 5px; background: linear-gradient(90deg, var(--gov-red) 0%, #F43F5E 50%, var(--gov-blue) 100%); }
-
-        .header { 
-            background: #FFFFFF; 
-            padding: 12px 30px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between;
-            border-bottom: 1px solid var(--card-border);
-            box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.05);
-        }
-        .header-left { display: flex; align-items: center; gap: 16px; }
-        .header-left .gov-logo { height: 70px; width: auto; object-fit: contain; }
-        .header-title h3 { margin: 0; font-size: 13px; color: var(--gov-red); font-weight: 700; }
-        .header-title h1 { margin: 0; font-size: 22px; font-weight: 800; color: var(--gov-blue); line-height: 1.2; }
-        .header-title p { margin: 0; font-size: 13px; font-weight: 600; color: var(--text-muted); }
-
-        .system-badge {
-            background: #EFF6FF;
-            color: var(--gov-blue-light);
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 700;
-            border: 1px solid #BFDBFE;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 25px auto;
-            padding: 0 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-        }
-        
-        .card { 
-            background: #FFFFFF; 
-            border: 1px solid var(--card-border); 
-            border-radius: 12px; 
-            padding: 20px; 
-            box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.02);
-        }
-        
-        .card-title { 
-            font-size: 16px; 
-            font-weight: 800; 
-            color: var(--gov-blue); 
-            margin-bottom: 14px; 
-            border-bottom: 2px solid #F1F5F9;
-            padding-bottom: 6px;
-        }
-
-        .input-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .input-box, select.input-box { 
-            width: 100%; 
-            padding: 10px 14px; 
-            border: 1px solid var(--card-border); 
-            border-radius: 8px; 
-            font-size: 14px;
-            outline: none;
-            background: #FFFFFF;
-            transition: all 0.2s;
-            color: var(--text-main);
-        }
-        .input-box:focus { border-color: var(--gov-blue-light); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
-        .input-readonly { background-color: #F1F5F9; font-weight: 700; color: #334155; }
-        
-        #route-name {
-            background-color: #EFF6FF;
-            border-color: #BFDBFE;
-            color: var(--gov-blue);
-            font-size: 14px;
-            font-weight: 700;
-        }
-
-        #auto-amt { 
-            background-color: #FFF1F2; 
-            font-weight: 800; 
-            color: var(--gov-red); 
-            border-color: #FECDD3; 
-            font-size: 16px;
-        }
-        
-        .file-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .file-label { font-size: 13px; font-weight: 700; color: var(--text-muted); margin-bottom: 5px; display: block; }
-
-        .btn { 
-            border: none; 
-            padding: 14px; 
-            border-radius: 8px; 
-            font-weight: 700; 
-            cursor: pointer; 
-            width: 100%; 
-            font-size: 16px; 
-            transition: all 0.2s ease-in-out; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
-        }
-        .btn-blue { background: var(--gov-blue); color: white; }
-        .btn-blue:hover { background: #1E40AF; transform: translateY(-1px); }
-        .btn-green { background: var(--start-green); color: white; margin-top: 10px; }
-
-        @media print { 
-            .no-print, .container, .header, .top-stripe { display: none !important; } 
-            .print-document { display: block !important; } 
-        }
-        .print-document { 
-            display: none; 
-            width: 100%; 
-            padding: 15mm; 
-            background: white; 
-            font-family: 'Mukta', 'Times New Roman', serif;
-        }
-        .receipt-border { 
-            border: 2px solid var(--gov-blue); 
-            padding: 28px; 
-            position: relative; 
-            border-radius: 8px;
-        }
-        .receipt-header { text-align: center; border-bottom: 2px dashed var(--gov-red); padding-bottom: 15px; margin-bottom: 20px; }
-        .receipt-header .gov-logo { height: 80px; width: auto; margin-bottom: 8px; }
-        .receipt-header h3 { margin: 0; font-size: 15px; color: var(--gov-red); font-weight: bold; }
-        .receipt-header h2 { margin: 4px 0; font-size: 22px; color: var(--gov-blue); font-weight: bold; }
-        .receipt-header p { margin: 0; font-size: 14px; font-weight: bold; }
-        
-        .receipt-badge { 
-            background: var(--gov-blue); 
-            color: white; 
-            display: inline-block; 
-            padding: 6px 24px; 
-            border-radius: 20px; 
-            font-size: 16px; 
-            font-weight: bold; 
-            margin-top: 12px; 
-        }
-        
-        .receipt-body { font-size: 16px; line-height: 2.2; margin-top: 25px; }
-        .receipt-body span { font-weight: bold; border-bottom: 1px dotted #333; }
-        .amount-highlight { font-size: 24px; color: var(--gov-red); font-weight: 800; }
+        :root { --gov-blue: #1E3A8A; --gov-red: #E11D48; --bg: #F8FAFC; }
+        * { box-sizing: border-box; font-family: 'Mukta', sans-serif; }
+        body { margin: 0; background: var(--bg); color: #0F172A; }
+        .header { background: #fff; padding: 15px 20px; border-bottom: 2px solid var(--gov-red); text-align: center; }
+        .header h2 { margin: 0; color: var(--gov-blue); font-size: 20px; }
+        .header p { margin: 2px 0 0 0; color: var(--gov-red); font-weight: bold; font-size: 14px; }
+        .container { max-width: 600px; margin: 20px auto; padding: 0 15px; }
+        .card { background: #fff; padding: 18px; border-radius: 10px; border: 1px solid #E2E8F0; margin-bottom: 15px; }
+        .card-title { font-weight: 800; color: var(--gov-blue); margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .form-group { margin-bottom: 12px; }
+        label { font-size: 13px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #CBD5E1; border-radius: 6px; outline: none; }
+        .readonly-box { background: #F1F5F9; font-weight: bold; }
+        .btn { width: 100%; padding: 12px; background: var(--gov-blue); color: #fff; border: none; border-radius: 6px; font-weight: 700; font-size: 16px; cursor: pointer; }
+        .btn-print { background: #059669; margin-top: 10px; display: none; }
+        @media print { .no-print { display: none !important; } .print-area { display: block !important; } }
+        .print-area { display: none; padding: 20px; border: 2px solid var(--gov-blue); border-radius: 8px; }
     </style>
 </head>
 <body>
 
-<div class="top-stripe no-print"></div>
-
-<!-- Header -->
 <div class="header no-print">
-    <div class="header-left">
-        <img class="gov-logo" src="https://raw.githubusercontent.com/nepal-gov/assets/main/emblem_of_nepal.png" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Emblem_of_Nepal.svg/500px-Emblem_of_Nepal.svg.png';" alt="Nepal Crest Emblem">
-        <div class="header-title">
-            <h3>गण्डकी प्रदेश सरकार</h3>
-            <h1>भौतिक पूर्वाधार विकास तथा यातायात व्यवस्था मन्त्रालय</h1>
-            <p>यातायात व्यवस्था कार्यालय, बागलुङ</p>
-        </div>
-    </div>
-    <div class="system-badge no-print">
-        पटके प्रणाली v2.0
-    </div>
+    <h2>यातायात व्यवस्था कार्यालय, बागलुङ</h2>
+    <p>सार्वजनिक पटके अनलाइन आवेदन प्रणाली</p>
 </div>
 
 <div class="container no-print">
-    <!-- 1. Route Selection Card -->
     <div class="card">
-        <div class="card-title">१. यात्रा रुट छनौट (स्थानको सूचीबाट छान्नुहोस्)</div>
-        <div class="input-grid">
-            <div>
-                <label class="file-label" style="color:var(--start-green);">📍 प्रस्थान विन्दु (FROM):</label>
-                <select id="from-select" class="input-box" onchange="onFromChange()">
-                    <option value="">-- प्रस्थान विन्दु छान्नुहोस् --</option>
-                </select>
-            </div>
-            <div>
-                <label class="file-label" style="color:var(--gov-red);">🏁 गन्तव्य विन्दु (TO):</label>
-                <select id="to-select" class="input-box" onchange="onToChange()" disabled>
-                    <option value="">-- पहिले प्रस्थान विन्दु छान्नुहोस् --</option>
-                </select>
-            </div>
+        <div class="card-title">१. रुट छनौट</div>
+        <div class="form-group">
+            <label>प्रस्थान विन्दु (FROM):</label>
+            <select id="from-select" onchange="onFromChange()"><option value="">-- छान्नुहोस् --</option></select>
+        </div>
+        <div class="form-group">
+            <label>गन्तव्य विन्दु (TO):</label>
+            <select id="to-select" onchange="onToChange()" disabled><option value="">-- पहिले प्रस्थान छान्नुहोस् --</option></select>
         </div>
     </div>
 
-    <!-- 2. Vehicle Details Card -->
     <div class="card">
-        <div class="card-title">२. सवारी विवरण तथा मान्य अवधि</div>
-        <div class="input-grid">
-            <div>
-                <label class="file-label">सवारी साधन नम्बर:</label>
-                <input type="text" id="v-no" class="input-box" placeholder="उदा: ध १ ख १२३४">
-            </div>
-            <div>
-                <label class="file-label">इजाजत पत्र नं (License No.):</label>
-                <input type="text" id="l-no" class="input-box" placeholder="इजाजत पत्र नं लेख्नुहोस्">
-            </div>
-        </div>
-        <div style="margin-top: 12px;">
-            <label class="file-label">पटके मान्य दिन (बढीमा ७ दिन):</label>
-            <select id="valid-days" class="input-box" onchange="updateValidDatesBS()">
-                <option value="1">१ दिनको लागि</option>
-                <option value="2">२ दिनको लागि</option>
-                <option value="3">३ दिनको लागि</option>
-                <option value="4">४ दिनको लागि</option>
-                <option value="5">५ दिनको लागि</option>
-                <option value="6">६ दिनको लागि</option>
-                <option value="7" selected>७ दिनको लागि (अधिकतम)</option>
-            </select>
-        </div>
+        <div class="card-title">२. सवारी विवरण</div>
+        <div class="form-group"><label>सवारी नम्बर:</label><input type="text" id="v-no" placeholder="उदा: ध १ ख १२३४"></div>
+        <div class="form-group"><label>लाइसेन्स नम्बर:</label><input type="text" id="l-no" placeholder="इजाजत पत्र नं"></div>
     </div>
 
-    <!-- 3. Automated Calculated Information -->
     <div class="card">
-        <div class="card-title">३. छानिएको रुट, समय र राजस्व</div>
-        <div style="margin-bottom: 12px;">
-            <label class="file-label">छानिएको यात्रा खण्ड:</label>
-            <input type="text" id="route-name" class="input-box input-readonly" placeholder="प्रस्थान र गन्तव्य छान्नुहोस्..." readonly>
-        </div>
-        <div style="margin-bottom: 12px;">
-            <label class="file-label">पटके मान्य अवधि (वि.सं. / BS Date):</label>
-            <input type="text" id="valid-period" class="input-box input-readonly" placeholder="मिति गणना हुँदैछ..." readonly>
-        </div>
-        <div class="input-grid">
-            <div>
-                <label class="file-label">दुरी (Km):</label>
-                <input type="text" id="v-dist" class="input-box input-readonly" placeholder="0 Km" readonly>
-            </div>
-            <div>
-                <label class="file-label">राजस्व रकम:</label>
-                <input type="text" id="auto-amt" class="input-box input-readonly" placeholder="रू. 0" readonly>
-            </div>
-        </div>
+        <div class="card-title">३. हिसाब विवरण</div>
+        <div class="form-group"><label>छानिएको रुट:</label><input type="text" id="route-name" class="readonly-box" readonly></div>
+        <div class="form-group"><label>दुरी (Km):</label><input type="text" id="v-dist" class="readonly-box" readonly></div>
     </div>
 
-    <!-- 4. Document Upload Card -->
     <div class="card">
-        <div class="card-title">४. कागजात अपलोड (Drive)</div>
-        <div class="file-grid">
-            <div>
-                <span class="file-label">रुट पर्मिट फोटो:</span>
-                <input type="file" id="route-photo" class="input-box" accept="image/*" style="font-size:12px;">
-            </div>
-            <div>
-                <span class="file-label">जाँचपास फोटो:</span>
-                <input type="file" id="fit-photo" class="input-box" accept="image/*" style="font-size:12px;">
-            </div>
-        </div>
+        <div class="card-title">४. कागजात अपलोड</div>
+        <div class="form-group"><label>रुट पर्मिट:</label><input type="file" id="route-photo" accept="image/*"></div>
+        <div class="form-group"><label>जाँचपास:</label><input type="file" id="fit-photo" accept="image/*"></div>
     </div>
 
-    <div>
-        <button id="submit-btn" class="btn btn-blue" onclick="prepareAndSaveData()">💾 विवरण सुरक्षित गरी रसिद बनाउनुहोस्</button>
-        <button id="print-btn" class="btn btn-green" style="display:none;" onclick="window.print()">🖨️ रसिद प्रिन्ट गर्नुहोस्</button>
-    </div>
+    <button id="submit-btn" class="btn" onclick="submitPublicForm()">📤 विवरण बुझाउनुहोस्</button>
+    <button id="print-btn" class="btn btn-print" onclick="window.print()">🖨️ रसिद प्रिन्ट गर्नुहोस्</button>
 </div>
 
-<!-- PRINT RECEIPT TEMPLATE -->
-<div class="print-document">
-    <div class="receipt-border">
-        <div class="receipt-header">
-            <img class="gov-logo" src="https://raw.githubusercontent.com/nepal-gov/assets/main/emblem_of_nepal.png" alt="Emblem Logo">
-            <h3>गण्डकी प्रदेश सरकार</h3>
-            <h2>भौतिक पूर्वाधार विकास तथा यातायात व्यवस्था मन्त्रालय</h2>
-            <p>यातायात व्यवस्था कार्यालय, बागलुङ</p>
-            <div class="receipt-badge">पटके यात्रा इजाजत–पत्र</div>
-        </div>
-
-        <div class="receipt-body">
-            <p><b>सवारी साधन नम्बर:</b> <span id="p-v-no"></span></p>
-            <p><b>इजाजत पत्र नं:</b> <span id="p-l-no"></span></p>
-            <p><b>इजाजत दिइएको यात्रा खण्ड:</b> <span id="p-route" style="color:var(--gov-blue);"></span></p>
-            <p><b>जम्मा यात्रा दुरी:</b> <span id="p-dist"></span> कि.मी.</p>
-            <p><b>पटके मान्य अवधि (वि.सं.):</b> <span id="p-valid-period" style="color:var(--start-green);"></span></p>
-            <p><b>प्राप्त राजस्व रकम:</b> रू. <span id="p-amt" class="amount-highlight"></span> /-</p>
-            <p><b>जारी गरिएको मिति (वि.सं.):</b> <span id="p-date"></span></p>
-        </div>
-        
-        <div style="margin-top: 60px; display: flex; justify-content: space-between; align-items: flex-end;">
-            <div style="font-size:12px; color:#555;">
-                * यो इजाजत पत्र उल्लेखित रुट र अवधिको लागि मात्र मान्य हुनेछ।
-            </div>
-            <div style="text-align: center;">
-                <p style="margin:0;">..........................................</p>
-                <p style="margin:5px 0 0 0; font-size: 14px;"><b>अधिकारप्राप्त अधिकारी</b></p>
-            </div>
-        </div>
-    </div>
+<!-- Receipt for Print -->
+<div class="print-area">
+    <h3 style="text-align:center; color:var(--gov-blue); margin:0;">यातायात व्यवस्था कार्यालय, बागलुङ</h3>
+    <h4 style="text-align:center; margin:5px 0 15px 0;">पटके यात्रा इजाजत–पत्र (Public Receipt)</h4>
+    <hr>
+    <p><b>सवारी साधन नम्बर:</b> <span id="p-vno"></span></p>
+    <p><b>इजाजत पत्र नं:</b> <span id="p-lno"></span></p>
+    <p><b>रुट:</b> <span id="p-route"></span></p>
+    <p><b>दुरी:</b> <span id="p-dist"></span></p>
+    <p><b>मिति:</b> <span id="p-date"></span></p>
 </div>
 
 <script>
-    // TAPPIKO WEB APP URL YAHAN RAKHNUHOS
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzvrnmzsHyjMET9eMpoLuouYv9WiqndiP--vHkl8Ea136w5H4qHXwQ3zV6nHdxKYiJRig/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxHzuIs2hGDlNrAmEIIJjoPDN-anFAc6uXO8JQNMLbI0QTNprEgPeiha2xW2Pax75cNrQ/exec";
 
     const routeData = [
         { from: "baglung", to: "muktinath", km: 107 },
         { from: "baglung", to: "korola boarder", km: 211 },
         { from: "muglin", to: "muktinath", km: 264 },
-        { from: "muglin", to: "korola boarder", km: 357 },
         { from: "kharbang", to: "butwal", km: 144 },
-        { from: "kharbang", to: "suppadeurali", km: 142 },
-        { from: "baglung", to: "suppadeurali", km: 147 },
-        { from: "ramdi", to: "butwal", km: 62 },
-        { from: "burtibang", to: "rukumkot", km: 89 },
-        { from: "burtibang", to: "khalanga rukum west", km: 106 },
-        { from: "kharbang", to: "tamghas", km: 38 },
-        { from: "baglung", to: "dhopatan", km: 130 },
-        { from: "belbagar baglung", to: "butwal", km: 176 },
-        { from: "baglung", to: "beni", km: 26 },
-        { from: "baglung", to: "singha tatopani", km: 38 },
-        { from: "baglung", to: "bhurung tatopani", km: 70 },
-        { from: "baglung", to: "narayanghat", km: 202 },
-        { from: "baglung", to: "kathmandu", km: 278 },
-        { from: "muglin", to: "kathmandu", km: 110 },
-        { from: "baglung", to: "galkot", km: 54 },
-        { from: "baglung", to: "tamghas", km: 103 },
-        { from: "baglung", to: "palpa", km: 136 },
-        { from: "baglung", to: "ridi", km: 85 }
+        { from: "baglung", to: "kathmandu", km: 278 }
     ];
 
     function initRoutes() {
         const fromSelect = document.getElementById('from-select');
         const uniqueFrom = [...new Set(routeData.map(item => item.from))].sort();
-        
-        uniqueFrom.forEach(fromLoc => {
+        uniqueFrom.forEach(f => {
             let opt = document.createElement('option');
-            opt.value = fromLoc;
-            opt.textContent = capitalizeFirst(fromLoc);
+            opt.value = f; opt.textContent = f.toUpperCase();
             fromSelect.appendChild(opt);
         });
     }
 
-    function capitalizeFirst(str) {
-        return str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-    }
-
     function onFromChange() {
-        const selectedFrom = document.getElementById('from-select').value;
-        const toSelect = document.getElementById('to-select');
-        
-        toSelect.innerHTML = '<option value="">-- गन्तव्य विन्दु छान्नुहोस् --</option>';
-        document.getElementById('v-dist').value = "0 Km";
-        document.getElementById('auto-amt').value = "रू. 0";
-        document.getElementById('route-name').value = "";
-
-        if (!selectedFrom) {
-            toSelect.disabled = true;
-            return;
-        }
-
-        const filteredTargets = routeData.filter(item => item.from === selectedFrom);
-        filteredTargets.forEach(item => {
+        const sel = document.getElementById('from-select').value;
+        const toSel = document.getElementById('to-select');
+        toSel.innerHTML = '<option value="">-- छान्नुहोस् --</option>';
+        if(!sel) { toSel.disabled = true; return; }
+        routeData.filter(i => i.from === sel).forEach(i => {
             let opt = document.createElement('option');
-            opt.value = item.to;
-            opt.textContent = capitalizeFirst(item.to) + ` (${item.km} Km)`;
-            opt.dataset.km = item.km;
-            toSelect.appendChild(opt);
+            opt.value = i.to; opt.textContent = i.to.toUpperCase() + ` (${i.km} Km)`;
+            opt.dataset.km = i.km;
+            toSel.appendChild(opt);
         });
-
-        toSelect.disabled = false;
+        toSel.disabled = false;
     }
 
     function onToChange() {
-        const fromSelect = document.getElementById('from-select');
-        const toSelect = document.getElementById('to-select');
-        const selectedOption = toSelect.options[toSelect.selectedIndex];
-
-        if (!toSelect.value) {
-            document.getElementById('v-dist').value = "0 Km";
-            document.getElementById('auto-amt').value = "रू. 0";
-            document.getElementById('route-name').value = "";
-            return;
-        }
-
-        const km = parseFloat(selectedOption.dataset.km);
-        const fromName = capitalizeFirst(fromSelect.value);
-        const toName = capitalizeFirst(toSelect.value);
-
-        document.getElementById('route-name').value = fromName + " ➔ " + toName;
-        document.getElementById('v-dist').value = km + " Km";
-
-        let amount = Math.ceil(km / 50) * 100;
-        document.getElementById('auto-amt').value = "रू. " + amount;
+        const f = document.getElementById('from-select').value;
+        const tOpt = document.getElementById('to-select').options[document.getElementById('to-select').selectedIndex];
+        if(!tOpt.value) return;
+        document.getElementById('route-name').value = f.toUpperCase() + " ➔ " + tOpt.value.toUpperCase();
+        document.getElementById('v-dist').value = tOpt.dataset.km + " Km";
     }
 
-    const bsCalendarData = {
-        2083: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30],
-        2084: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30]
-    };
-
-    function convertADToBS(adDate) {
-        let refAD = new Date(2026, 6, 27); 
-        let refBS = { y: 2083, m: 4, d: 12 };
-        
-        let diffDays = Math.floor((adDate.getTime() - refAD.getTime()) / (1000 * 3600 * 24));
-        
-        let curY = refBS.y, curM = refBS.m, curD = refBS.d + diffDays;
-
-        while (true) {
-            let monthDays = bsCalendarData[curY] ? bsCalendarData[curY][curM - 1] : 30;
-            if (curD > monthDays) {
-                curD -= monthDays;
-                curM++;
-                if (curM > 12) { curM = 1; curY++; }
-            } else if (curD < 1) {
-                curM--;
-                if (curM < 1) { curM = 12; curY--; }
-                curD += (bsCalendarData[curY] ? bsCalendarData[curY][curM - 1] : 30);
-            } else { break; }
-        }
-
-        let mStr = curM < 10 ? '0' + curM : curM;
-        let dStr = curD < 10 ? '0' + curD : curD;
-        return `${curY}/${mStr}/${dStr}`;
-    }
-
-    function updateValidDatesBS() {
-        let selectedDays = parseInt(document.getElementById('valid-days').value) || 1;
-        let startDateAD = new Date();
-        let endDateAD = new Date();
-        endDateAD.setDate(startDateAD.getDate() + (selectedDays - 1));
-
-        let startBS = convertADToBS(startDateAD);
-        let endBS = convertADToBS(endDateAD);
-
-        document.getElementById('valid-period').value = startBS + " देखि " + endBS + " सम्म (" + selectedDays + " दिन)";
-    }
-
-    window.onload = function() {
-        initRoutes();
-        updateValidDatesBS();
-    };
-
-    const fileToBase64 = file => new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve({ data: reader.result.split(',')[1], type: file.type });
-        reader.onerror = error => reject(error);
+    const fileToBase64 = file => new Promise((res, rej) => {
+        const reader = new FileReader(); reader.readAsDataURL(file);
+        reader.onload = () => res({ data: reader.result.split(',')[1], type: file.type });
+        reader.onerror = err => rej(err);
     });
 
-    async function prepareAndSaveData() {
+    async function submitPublicForm() {
         const vNo = document.getElementById('v-no').value;
         const lNo = document.getElementById('l-no').value;
-        const dist = document.getElementById('v-dist').value;
         const route = document.getElementById('route-name').value;
-        const amt = document.getElementById('auto-amt').value;
-        const validPeriod = document.getElementById('valid-period').value;
-        const todayBS = convertADToBS(new Date());
+        const dist = document.getElementById('v-dist').value;
+        const routeFile = document.getElementById('route-photo').files[0];
+        const fitFile = document.getElementById('fit-photo').files[0];
 
-        const routePhotoFile = document.getElementById('route-photo').files[0];
-        const fitPhotoFile = document.getElementById('fit-photo').files[0];
+        if(!vNo || !lNo || !route) { alert("कृपया विवरण भर्नुहोस्!"); return; }
 
-        if(!vNo || !lNo || dist === "0 Km" || !route) { 
-            alert("कृपया सबै विवरण भर्नुहोस् र प्रस्थान/गन्तव्य ठाउँ छान्नुहोस्!"); 
-            return; 
-        }
-
-        const submitBtn = document.getElementById('submit-btn');
-        submitBtn.innerText = "डाटा सेभ हुँदैछ... पर्खनुहोस्";
-        submitBtn.disabled = true;
+        const btn = document.getElementById('submit-btn');
+        btn.innerText = "पठाउँदैछ..."; btn.disabled = true;
 
         try {
-            let routePhotoData = routePhotoFile ? await fileToBase64(routePhotoFile) : null;
-            let fitPhotoData = fitPhotoFile ? await fileToBase64(fitPhotoFile) : null;
+            let routeP = routeFile ? await fileToBase64(routeFile) : null;
+            let fitP = fitFile ? await fileToBase64(fitFile) : null;
 
-            // Send payload matching Sheet columns (A-G)
             const payload = {
-                date: todayBS,
-                vNo: vNo,
-                lNo: lNo,
-                route: route,
-                dist: dist,
-                routePhoto: routePhotoData,
-                fitPhoto: fitPhotoData
+                action: "submitForm",
+                date: new Date().toLocaleDateString('ne-NP'),
+                vNo: vNo, lNo: lNo, route: route, dist: dist,
+                routePhoto: routeP, fitPhoto: fitP
             };
 
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+            await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
 
-            document.getElementById('p-v-no').innerText = vNo;
-            document.getElementById('p-l-no').innerText = lNo;
+            document.getElementById('p-vno').innerText = vNo;
+            document.getElementById('p-lno').innerText = lNo;
             document.getElementById('p-route').innerText = route;
             document.getElementById('p-dist').innerText = dist;
-            document.getElementById('p-amt').innerText = amt;
-            document.getElementById('p-valid-period').innerText = validPeriod;
-            document.getElementById('p-date').innerText = todayBS;
+            document.getElementById('p-date').innerText = payload.date;
 
-            submitBtn.innerText = "सफलतापूर्वक सेभ भयो!";
-            document.getElementById('print-btn').style.display = 'flex';
-            alert("विवरण Google Sheet मा सफलतापूर्वक सेभ भयो।");
-
-        } catch (error) {
-            console.error(error);
-            alert("डाटा सेभ गर्दा समस्या आयो!");
-            submitBtn.innerText = "💾 विवरण सुरक्षित गरी रसिद बनाउनुहोस्";
-            submitBtn.disabled = false;
+            btn.innerText = "सफलतापूर्वक बुझाइयो!";
+            document.getElementById('print-btn').style.display = 'block';
+            alert("तपाईँको विवरण अनलाइन दर्ता भयो। रसिद प्रिन्ट गर्न सक्नुहुन्छ।");
+        } catch (e) {
+            alert("त्रुटि भयो!"); btn.innerText = "📤 विवरण बुझाउनुहोस्"; btn.disabled = false;
         }
     }
+
+    window.onload = initRoutes;
 </script>
 </body>
 </html>
