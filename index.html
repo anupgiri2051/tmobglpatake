@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>नेपाल सरकार | पटके यात्रा इजाजत-पत्र पोर्टल</title>
     <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Nepali Date Library -->
+    <script src="https://nepalidatetimepicker.page365.com.np/nepali.datepicker.v4.0.1.min.js" type="text/javascript"></script>
     <style>
         :root { --gov-red: #B91C1C; --gov-blue: #1E3A8A; --bg-gray: #F8FAFC; --border: #CBD5E1; }
         * { box-sizing: border-box; font-family: 'Mukta', sans-serif; }
@@ -69,7 +71,6 @@
     <div class="card" style="border-top: 4px solid var(--gov-blue);">
         <div class="card-title">📝 नयाँ पटके अनलाइन आवेदन फारम</div>
         
-        <!-- Exchanged List: FROM list is now set as the primary routes starting from BAGLUNG / Major hubs -->
         <div class="form-group">
             <label>प्रस्थान विन्दु (FROM):</label>
             <select id="from-select" onchange="calculateRoute()">
@@ -96,7 +97,6 @@
             </select>
         </div>
 
-        <!-- Exchanged List: TO list contains destinations including border points & shrines -->
         <div class="form-group">
             <label>गन्तव्य विन्दु (TO):</label>
             <select id="to-select" onchange="calculateRoute()">
@@ -137,6 +137,11 @@
         </div>
 
         <div class="form-group">
+            <label>अनुमानित राजस्व रकम (रु):</label>
+            <input type="text" id="v-amount" class="readonly-box" readonly placeholder="रु. 0">
+        </div>
+
+        <div class="form-group">
             <label>रुट पर्मिट कागजात (Photo):</label>
             <input type="file" id="route-photo" accept="image/*">
         </div>
@@ -151,7 +156,7 @@
     </div>
 </div>
 
-<!-- PRINT RECEIPT -->
+<!-- PRINT RECEIPT (नेपाली मिति BS सह) -->
 <div class="print-area">
     <div style="text-align: center; border-bottom:2px solid var(--gov-red); padding-bottom:10px;">
         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Emblem_of_Nepal.svg/512px-Emblem_of_Nepal.svg.png" style="height:70px;">
@@ -160,19 +165,19 @@
         <p style="margin:0; font-weight:bold; color:var(--gov-red);">पटके यात्रा इजाजत–पत्र (Temporary Route Permit)</p>
     </div>
     <table class="receipt-table">
-        <tr><td><b>जारी मिति:</b></td><td><span id="p-date"></span></td></tr>
-        <tr><td><b style="color:var(--gov-red);">म्याद सकिने मिति:</b></td><td><b id="p-exp-date" style="color:var(--gov-red);"></b></td></tr>
+        <tr><td><b>जारी मिति (BS):</b></td><td><span id="p-date"></span></td></tr>
+        <tr><td><b style="color:var(--gov-red);">म्याद सकिने मिति (BS):</b></td><td><b id="p-exp-date" style="color:var(--gov-red);"></b></td></tr>
         <tr><td><b>सवारी साधन नम्बर:</b></td><td><b id="p-vno"></b></td></tr>
         <tr><td><b>लाइसेन्स/इजाजत पत्र नं:</b></td><td><span id="p-lno"></span></td></tr>
         <tr><td><b>स्वीकृत रुट:</b></td><td><b id="p-route"></b></td></tr>
         <tr><td><b>कुल दुरी:</b></td><td><span id="p-dist"></span></td></tr>
-        <tr><td><b>राजस्व रकम:</b></td><td>Rs. <span id="p-amount"></span></td></tr>
+        <tr><td><b>राजस्व रकम:</b></td><td>रु. <span id="p-amount"></span></td></tr>
         <tr><td><b>कैफियत (Remarks):</b></td><td><span id="p-remarks"></span></td></tr>
     </table>
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwB7IF7DlkPoxZIU2Z_gOCziQUBkKE3eCufIB_ffgHrlFRaol1rUsFFiFL2_iJZsXoQ9g/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzQ-zHXqj_B7NWn6ez5wKqvWE_6y3fndcZc6dOXD4RKCobQJtMixYlL2kfWN0T2FePJJw/exec";
 
     const routeData = [
         { from: "MUKTINATH", to: "BAGLUNG", km: 107 },
@@ -206,6 +211,13 @@
 
     function cleanName(str) { return str ? str.toString().trim().toUpperCase() : ''; }
 
+    function calculateAutoRevenue(km) {
+        if (km <= 50) return 300;
+        if (km <= 100) return 500;
+        if (km <= 200) return 800;
+        return 1200;
+    }
+
     function calculateRoute() {
         const fromVal = cleanName(document.getElementById('from-select').value);
         const toVal = cleanName(document.getElementById('to-select').value);
@@ -220,7 +232,12 @@
             (cleanName(r.from) === toVal && cleanName(r.to) === fromVal)
         );
 
-        document.getElementById('v-dist').value = match ? match.km + " Km" : "50 Km";
+        const distKm = match ? match.km : 50;
+        document.getElementById('v-dist').value = distKm + " Km";
+        
+        // दुरी अनुसार स्वतः राजस्व गणना
+        const autoRevenue = calculateAutoRevenue(distKm);
+        document.getElementById('v-amount').value = "रु. " + autoRevenue;
     }
 
     const fileToBase64 = file => new Promise((res, rej) => {
@@ -234,6 +251,7 @@
         const lNo = document.getElementById('l-no').value;
         const route = document.getElementById('route-name').value;
         const dist = document.getElementById('v-dist').value;
+        const amtText = document.getElementById('v-amount').value.replace(/[^0-9]/g, '');
         const routeFile = document.getElementById('route-photo').files[0];
         const fitFile = document.getElementById('fit-photo').files[0];
 
@@ -246,11 +264,19 @@
             let routeP = routeFile ? await fileToBase64(routeFile) : "";
             let fitP = fitFile ? await fileToBase64(fitFile) : "";
 
+            // Current BS Date
+            const currentBSDate = NepaliFunctions.GetCurrentBsDate().bsDate;
+
             const payload = {
                 action: "submitForm",
-                date: new Date().toISOString().split('T')[0],
-                vNo: vNo, lNo: lNo, route: route, dist: dist,
-                routePhoto: routeP, fitPhoto: fitP
+                date: currentBSDate,
+                vNo: vNo, 
+                lNo: lNo, 
+                route: route, 
+                dist: dist,
+                amount: amtText || 500,
+                routePhoto: routeP, 
+                fitPhoto: fitP
             };
 
             await fetch(SCRIPT_URL, { 
@@ -262,9 +288,12 @@
 
             alert("तपाईँको पटके आवेदन सफलतापुर्वक दर्ता भयो!");
             btn.innerText = "📤 आवेदन दर्ता गर्नुहोस्"; btn.disabled = false;
-            document.getElementById('v-no').value = ""; document.getElementById('l-no').value = "";
+            document.getElementById('v-no').value = ""; 
+            document.getElementById('l-no').value = "";
         } catch (e) {
-            alert("त्रुटि भयो!"); btn.innerText = "📤 आवेदन दर्ता गर्नुहोस्"; btn.disabled = false;
+            alert("त्रुटि भयो!"); 
+            btn.innerText = "📤 आवेदन दर्ता गर्नुहोस्"; 
+            btn.disabled = false;
         }
     }
 
