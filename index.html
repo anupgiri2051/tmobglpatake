@@ -69,41 +69,50 @@
     <div class="card" style="border-top: 4px solid var(--gov-blue);">
         <div class="card-title">📝 नयाँ पटके अनलाइन आवेदन फारम</div>
         
+        <!-- Exchanged List: FROM list is now set as the primary routes starting from BAGLUNG / Major hubs -->
         <div class="form-group">
             <label>प्रस्थान विन्दु (FROM):</label>
             <select id="from-select" onchange="calculateRoute()">
-                <option value="">-- छान्नुहोस् --</option>
+                <option value="">-- प्रस्थान विन्दु छान्नुहोस् --</option>
                 <option value="BAGLUNG">BAGLUNG</option>
+                <option value="BELBAGAR BAGLUNG">BELBAGAR BAGLUNG</option>
                 <option value="BENI">BENI</option>
-                <option value="BHURUNG TATOPANI">BHURUNG TATOPANI</option>
                 <option value="BURTIBANG">BURTIBANG</option>
                 <option value="BUTWAL">BUTWAL</option>
                 <option value="DHOPATAN">DHOPATAN</option>
                 <option value="GALKOT">GALKOT</option>
                 <option value="KATHMANDU">KATHMANDU</option>
-                <option value="KOROLA BOARDER">KOROLA BOARDER</option>
+                <option value="KHALANGA RUKUM WEST">KHALANGA RUKUM WEST</option>
+                <option value="KHARBANG">KHARBANG</option>
                 <option value="KUSMA">KUSMA</option>
                 <option value="MUGLIN">MUGLIN</option>
+                <option value="PALPA">PALPA</option>
                 <option value="POKHARA">POKHARA</option>
+                <option value="RIDI">RIDI</option>
+                <option value="RUKUMKOT">RUKUMKOT</option>
+                <option value="SUPPADEURALI">SUPPADEURALI</option>
+                <option value="TAMGHAS">TAMGHAS</option>
+                <option value="WALING">WALING</option>
             </select>
         </div>
 
+        <!-- Exchanged List: TO list contains destinations including border points & shrines -->
         <div class="form-group">
             <label>गन्तव्य विन्दु (TO):</label>
             <select id="to-select" onchange="calculateRoute()">
-                <option value="">-- छान्नुहोस् --</option>
+                <option value="">-- गन्तव्य विन्दु छान्नुहोस् --</option>
                 <option value="BAGLUNG">BAGLUNG</option>
-                <option value="BENI">BENI</option>
                 <option value="BHURUNG TATOPANI">BHURUNG TATOPANI</option>
                 <option value="BURTIBANG">BURTIBANG</option>
                 <option value="BUTWAL">BUTWAL</option>
-                <option value="DHOPATAN">DHOPATAN</option>
-                <option value="GALKOT">GALKOT</option>
                 <option value="KATHMANDU">KATHMANDU</option>
                 <option value="KOROLA BOARDER">KOROLA BOARDER</option>
-                <option value="KUSMA">KUSMA</option>
                 <option value="MUGLIN">MUGLIN</option>
+                <option value="MUKTINATH">MUKTINATH</option>
+                <option value="NARAYANGHAT">NARAYANGHAT</option>
                 <option value="POKHARA">POKHARA</option>
+                <option value="RAMDI">RAMDI</option>
+                <option value="SINGHA TATOPANI">SINGHA TATOPANI</option>
             </select>
         </div>
 
@@ -158,6 +167,7 @@
         <tr><td><b>स्वीकृत रुट:</b></td><td><b id="p-route"></b></td></tr>
         <tr><td><b>कुल दुरी:</b></td><td><span id="p-dist"></span></td></tr>
         <tr><td><b>राजस्व रकम:</b></td><td>Rs. <span id="p-amount"></span></td></tr>
+        <tr><td><b>कैफियत (Remarks):</b></td><td><span id="p-remarks"></span></td></tr>
     </table>
 </div>
 
@@ -165,13 +175,33 @@
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwB7IF7DlkPoxZIU2Z_gOCziQUBkKE3eCufIB_ffgHrlFRaol1rUsFFiFL2_iJZsXoQ9g/exec";
 
     const routeData = [
-        { from: "BHURUNG TATOPANI", to: "BAGLUNG", km: 70 },
+        { from: "MUKTINATH", to: "BAGLUNG", km: 107 },
+        { from: "KOROLA BOARDER", to: "BAGLUNG", km: 211 },
+        { from: "MUKTINATH", to: "MUGLIN", km: 264 },
+        { from: "KOROLA BOARDER", to: "MUGLIN", km: 357 },
+        { from: "BUTWAL", to: "KHARBANG", km: 144 },
+        { from: "SUPPADEURALI", to: "KHARBANG", km: 142 },
+        { from: "SUPPADEURALI", to: "BAGLUNG", km: 147 },
+        { from: "BUTWAL", to: "RAMDI", km: 62 },
+        { from: "RUKUMKOT", to: "BURTIBANG", km: 89 },
+        { from: "KHALANGA RUKUM WEST", to: "BURTIBANG", km: 106 },
+        { from: "TAMGHAS", to: "KHARBANG", km: 38 },
         { from: "DHOPATAN", to: "BAGLUNG", km: 130 },
-        { from: "KATHMANDU", to: "BAGLUNG", km: 278 },
-        { from: "POKHARA", to: "BAGLUNG", km: 72 },
-        { from: "BURTIBANG", to: "BAGLUNG", km: 92 },
+        { from: "BUTWAL", to: "BELBAGAR BAGLUNG", km: 176 },
         { from: "BENI", to: "BAGLUNG", km: 26 },
-        { from: "KUSMA", to: "BAGLUNG", km: 14 }
+        { from: "SINGHA TATOPANI", to: "BAGLUNG", km: 38 },
+        { from: "BHURUNG TATOPANI", to: "BAGLUNG", km: 70 },
+        { from: "NARAYANGHAT", to: "BAGLUNG", km: 202 },
+        { from: "KATHMANDU", to: "BAGLUNG", km: 278 },
+        { from: "KATHMANDU", to: "MUGLIN", km: 110 },
+        { from: "GALKOT", to: "BAGLUNG", km: 54 },
+        { from: "TAMGHAS", to: "BAGLUNG", km: 103 },
+        { from: "PALPA", to: "BAGLUNG", km: 136 },
+        { from: "RIDI", to: "BAGLUNG", km: 85 },
+        { from: "POKHARA", to: "BAGLUNG", km: 72 },
+        { from: "KUSMA", to: "BAGLUNG", km: 14 },
+        { from: "BURTIBANG", to: "BAGLUNG", km: 92 },
+        { from: "WALING", to: "BAGLUNG", km: 80 }
     ];
 
     function cleanName(str) { return str ? str.toString().trim().toUpperCase() : ''; }
@@ -264,6 +294,7 @@
                     document.getElementById('p-date').innerText = record.date;
                     document.getElementById('p-exp-date').innerText = record.expDate || record.date;
                     document.getElementById('p-amount').innerText = record.amount || "0";
+                    document.getElementById('p-remarks').innerText = record.remarks || "-";
                     printBtn.style.display = 'block';
                 }
             } else {

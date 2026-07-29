@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>कार्यालय एडमिन पोर्टल | पटके स्वीकृति प्रणाली</title>
-    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root { --gov-blue: #1E3A8A; --gov-red: #B91C1C; }
         * { box-sizing: border-box; font-family: 'Mukta', sans-serif; }
@@ -12,21 +12,27 @@
         .navbar { background: var(--gov-blue); color: #fff; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; }
         .navbar h2 { margin: 0; font-size: 18px; }
 
-        .container { max-width: 1200px; margin: 25px auto; padding: 0 15px; }
+        .container { max-width: 1350px; margin: 25px auto; padding: 0 15px; }
+
+        .summary-cards { display: flex; gap: 20px; margin-bottom: 20px; }
+        .summary-card { background: #fff; padding: 18px; border-radius: 10px; flex: 1; border-left: 5px solid var(--gov-blue); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .summary-card h4 { margin: 0; color: #64748B; font-size: 14px; }
+        .summary-card p { margin: 5px 0 0 0; font-size: 22px; font-weight: 800; color: var(--gov-blue); }
+
         .card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
 
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #E2E8F0; font-size: 14px; }
-        th { background: #F8FAFC; color: #334155; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #E2E8F0; font-size: 13px; }
+        th { background: #F8FAFC; color: #334155; font-weight: 700; }
 
         .badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; }
         .Pending { background: #FEF08A; color: #854D0E; }
         .Approved { background: #DCFCE7; color: #166534; }
         .Rejected { background: #FEE2E2; color: #991B1B; }
 
-        .btn-action { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: white; font-size: 12px; }
-        .btn-approve { background: #166534; }
-        .btn-reject { background: #991B1B; }
+        .btn-action { padding: 6px 10px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: white; font-size: 12px; margin-bottom: 4px; }
+        .btn-approve { background: #166534; width: 100%; }
+        .btn-reject { background: #991B1B; width: 100%; }
         
         .photo-link { color: #0284C7; text-decoration: none; font-weight: bold; }
         .photo-link:hover { text-decoration: underline; }
@@ -40,6 +46,23 @@
 </div>
 
 <div class="container">
+    
+    <!-- STATS / REVENUE SUMMARY -->
+    <div class="summary-cards">
+        <div class="summary-card" style="border-left-color: #166534;">
+            <h4>सङ्कलित कुल राजस्व (Total Revenue)</h4>
+            <p>रु. <span id="total-revenue">0</span></p>
+        </div>
+        <div class="summary-card" style="border-left-color: #0284C7;">
+            <h4>कुल स्वीकृत आवेदन (Approved)</h4>
+            <p id="total-approved">0</p>
+        </div>
+        <div class="summary-card" style="border-left-color: #854D0E;">
+            <h4>पेन्डिङ आवेदन (Pending)</h4>
+            <p id="total-pending">0</p>
+        </div>
+    </div>
+
     <div class="card">
         <h3>📋 दर्ता भएका पटके आवेदनहरू</h3>
         <table>
@@ -52,13 +75,14 @@
                     <th>दुरी</th>
                     <th>कागजातहरू</th>
                     <th>स्थिति (Status)</th>
-                    <th>राजस्व रकम</th>
+                    <th>राजस्व रकम (रु)</th>
                     <th>म्याद (Expired)</th>
+                    <th>कैफियत (Remarks)</th>
                     <th>कार्य (Action)</th>
                 </tr>
             </thead>
             <tbody id="table-body">
-                <tr><td colspan="10" style="text-align:center;">डाटा तान्दैछ...</td></tr>
+                <tr><td colspan="11" style="text-align:center;">डाटा तान्दैछ...</td></tr>
             </tbody>
         </table>
     </div>
@@ -69,19 +93,31 @@
 
     async function loadApplications() {
         const tbody = document.getElementById('table-body');
-        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;">लोड हुँदैछ...</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;">लोड हुँदैछ...</td></tr>`;
 
         try {
             const res = await fetch(SCRIPT_URL);
             const data = await res.json();
 
             if(data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;">कुनै डाटा भेटिएन।</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;">कुनै डाटा भेटिएन।</td></tr>`;
                 return;
             }
 
             tbody.innerHTML = "";
+            let totalRevenue = 0;
+            let approvedCount = 0;
+            let pendingCount = 0;
+
             data.forEach(item => {
+                // Total collected revenue calculation for approved records
+                if(item.status === 'Approved') {
+                    approvedCount++;
+                    totalRevenue += Number(item.amount || 0);
+                } else if(item.status === 'Pending') {
+                    pendingCount++;
+                }
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${item.date}</td>
@@ -94,8 +130,9 @@
                         ${item.fitPhoto ? `<a href="${item.fitPhoto}" target="_blank" class="photo-link">जाँचपास</a>` : 'नो फोटो'}
                     </td>
                     <td><span class="badge ${item.status}">${item.status}</span></td>
-                    <td><input type="number" id="amt-${item.id}" value="${item.amount || 500}" style="width:70px;"></td>
-                    <td><input type="date" id="exp-${item.id}" value="${item.expDate || item.date}"></td>
+                    <td><input type="number" id="amt-${item.id}" value="${item.amount || 500}" style="width:70px; padding:4px;"></td>
+                    <td><input type="date" id="exp-${item.id}" value="${item.expDate || item.date}" style="padding:4px;"></td>
+                    <td><input type="text" id="rem-${item.id}" value="${item.remarks || ''}" placeholder="कैफियत..." style="width:110px; padding:4px;"></td>
                     <td>
                         <button class="btn-action btn-approve" onclick="updateStatus(${item.id}, 'Approved')">स्वीकृत</button>
                         <button class="btn-action btn-reject" onclick="updateStatus(${item.id}, 'Rejected')">अस्वीकृत</button>
@@ -103,14 +140,21 @@
                 `;
                 tbody.appendChild(tr);
             });
+
+            // Update stats
+            document.getElementById('total-revenue').innerText = totalRevenue.toLocaleString('ne-NP');
+            document.getElementById('total-approved').innerText = approvedCount;
+            document.getElementById('total-pending').innerText = pendingCount;
+
         } catch(e) {
-            tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; color:red;">डाटा लोड गर्न सकिएन!</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; color:red;">डाटा लोड गर्न सकिएन!</td></tr>`;
         }
     }
 
     async function updateStatus(rowId, status) {
         const expDate = document.getElementById(`exp-${rowId}`).value;
         const amount = document.getElementById(`amt-${rowId}`).value;
+        const remarks = document.getElementById(`rem-${rowId}`).value;
 
         if(!confirm(`के तपाईं यो फारम ${status} गर्न चाहनुहुन्छ?`)) return;
 
@@ -119,7 +163,8 @@
             rowId: rowId,
             status: status,
             expDate: expDate,
-            amount: amount
+            amount: amount,
+            remarks: remarks
         };
 
         try {
@@ -137,7 +182,6 @@
         }
     }
 
-    // सुरुमा डाटाहरू लोड गर्ने
     window.onload = loadApplications;
 </script>
 </body>
