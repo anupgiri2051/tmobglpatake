@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>नेपाल सरकार | पटके यात्रा इजाजत-पत्र पोर्टल</title>
     <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <!-- Nepali Date Library -->
+    
+    <!-- Nepali Date Picker JS -->
     <script src="https://nepalidatetimepicker.page365.com.np/nepali.datepicker.v4.0.1.min.js" type="text/javascript"></script>
+
     <style>
         :root { --gov-red: #B91C1C; --gov-blue: #1E3A8A; --bg-gray: #F8FAFC; --border: #CBD5E1; }
         * { box-sizing: border-box; font-family: 'Mukta', sans-serif; }
@@ -26,7 +28,7 @@
         label { font-size: 13px; font-weight: 700; color: #334155; display: block; margin-bottom: 4px; }
         input, select { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; outline: none; font-size: 15px; }
         input:focus, select:focus { border-color: var(--gov-blue); }
-        .readonly-box { background: #F1F5F9; font-weight: bold; color: var(--gov-blue); }
+        .readonly-box { background: #F1F5F9; font-weight: bold; color: var(--gov-blue); cursor: not-allowed; }
 
         .btn { width: 100%; padding: 12px; background: var(--gov-blue); color: #fff; border: none; border-radius: 8px; font-weight: 700; font-size: 16px; cursor: pointer; }
         .btn:hover { background: #1E40AF; }
@@ -38,10 +40,14 @@
         .status-Approved { background: #DCFCE7; color: #166534; }
         .status-Rejected { background: #FEE2E2; color: #991B1B; }
 
-        @media print { .no-print { display: none !important; } .print-area { display: block !important; } }
+        @media print { 
+            .no-print { display: none !important; } 
+            .print-area { display: block !important; } 
+            @page { margin: 15mm; }
+        }
         .print-area { display: none; padding: 30px; border: 3px double var(--gov-blue); background: #fff; }
         .receipt-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        .receipt-table td { padding: 8px; border-bottom: 1px solid #E2E8F0; font-size: 14px; }
+        .receipt-table td { padding: 10px; border-bottom: 1px solid #E2E8F0; font-size: 15px; }
     </style>
 </head>
 <body>
@@ -70,7 +76,12 @@
     <!-- PUBLIC FORM -->
     <div class="card" style="border-top: 4px solid var(--gov-blue);">
         <div class="card-title">📝 नयाँ पटके अनलाइन आवेदन फारम</div>
-        
+
+        <div class="form-group">
+            <label>आवेदन मिति (BS):</label>
+            <input type="text" id="v-bs-date" class="readonly-box" readonly placeholder="मिति लोड हुँदैछ...">
+        </div>
+
         <div class="form-group">
             <label>प्रस्थान विन्दु (FROM):</label>
             <select id="from-select" onchange="calculateRoute()">
@@ -156,7 +167,7 @@
     </div>
 </div>
 
-<!-- PRINT RECEIPT (नेपाली मिति BS सह) -->
+<!-- PRINT RECEIPT -->
 <div class="print-area">
     <div style="text-align: center; border-bottom:2px solid var(--gov-red); padding-bottom:10px;">
         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Emblem_of_Nepal.svg/512px-Emblem_of_Nepal.svg.png" style="height:70px;">
@@ -177,7 +188,39 @@
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzQ-zHXqj_B7NWn6ez5wKqvWE_6y3fndcZc6dOXD4RKCobQJtMixYlL2kfWN0T2FePJJw/exec";
+    // ⚠️ यहाँ तपाईंको Apps Script Web App URL राख्नुहोस्
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyPaSA9POO_-MEWTPmq3gi-jd6H9ZgXsMLLefY2JXyKq2sw2VkaYLzKmaT2lUrYJYBTpw/exec";
+
+    // BS Date Format Helper Method
+    function formatBsDate(rawDate) {
+        if (!rawDate) return "-";
+        if (rawDate.includes("GMT") || rawDate.includes("T")) {
+            const d = new Date(rawDate);
+            if (!isNaN(d.getTime()) && typeof NepaliFunctions !== "undefined") {
+                const bsObj = NepaliFunctions.AD2BS({
+                    year: d.getFullYear(),
+                    month: d.getMonth() + 1,
+                    day: d.getDate()
+                });
+                return `${bsObj.year}-${String(bsObj.month).padStart(2, '0')}-${String(bsObj.day).padStart(2, '0')}`;
+            }
+        }
+        return rawDate;
+    }
+
+    // आजको BS मिति स्वतः राख्ने
+    window.onload = function() {
+        const input = document.getElementById("v-bs-date");
+        try {
+            if (typeof NepaliFunctions !== "undefined") {
+                input.value = NepaliFunctions.GetCurrentBsDate().bsDate;
+            } else {
+                input.value = new Date().toISOString().split('T')[0];
+            }
+        } catch (e) {
+            input.value = new Date().toISOString().split('T')[0];
+        }
+    };
 
     const routeData = [
         { from: "MUKTINATH", to: "BAGLUNG", km: 107 },
@@ -211,11 +254,14 @@
 
     function cleanName(str) { return str ? str.toString().trim().toUpperCase() : ''; }
 
+    // 💡 नयाँ दर अनुसार स्वयम् राजस्व हिसाब गर्ने Logic:
+    // Up to 50 km: Rs 100
+    // 51-100 km: Rs 200
+    // 101-150 km: Rs 300
+    // 151-200 km: Rs 400 ...
     function calculateAutoRevenue(km) {
-        if (km <= 50) return 300;
-        if (km <= 100) return 500;
-        if (km <= 200) return 800;
-        return 1200;
+        if (!km || km <= 0) return 100;
+        return Math.ceil(km / 50) * 100;
     }
 
     function calculateRoute() {
@@ -235,7 +281,6 @@
         const distKm = match ? match.km : 50;
         document.getElementById('v-dist').value = distKm + " Km";
         
-        // दुरी अनुसार स्वतः राजस्व गणना
         const autoRevenue = calculateAutoRevenue(distKm);
         document.getElementById('v-amount').value = "रु. " + autoRevenue;
     }
@@ -254,8 +299,9 @@
         const amtText = document.getElementById('v-amount').value.replace(/[^0-9]/g, '');
         const routeFile = document.getElementById('route-photo').files[0];
         const fitFile = document.getElementById('fit-photo').files[0];
+        const bsDate = document.getElementById('v-bs-date').value;
 
-        if(!vNo || !lNo || !route) { alert("कृपया सम्पूर्ण आवश्यक विवरण भर्नुहोस्!"); return; }
+        if(!vNo || !lNo || !route || !bsDate) { alert("कृपया सम्पूर्ण आवश्यक विवरण भर्नुहोस्!"); return; }
 
         const btn = document.getElementById('submit-btn');
         btn.innerText = "दर्ता हुँदैछ..."; btn.disabled = true;
@@ -264,17 +310,14 @@
             let routeP = routeFile ? await fileToBase64(routeFile) : "";
             let fitP = fitFile ? await fileToBase64(fitFile) : "";
 
-            // Current BS Date
-            const currentBSDate = NepaliFunctions.GetCurrentBsDate().bsDate;
-
             const payload = {
                 action: "submitForm",
-                date: currentBSDate,
+                date: bsDate,
                 vNo: vNo, 
                 lNo: lNo, 
                 route: route, 
                 dist: dist,
-                amount: amtText || 500,
+                amount: amtText || 100,
                 routePhoto: routeP, 
                 fitPhoto: fitP
             };
@@ -291,7 +334,7 @@
             document.getElementById('v-no').value = ""; 
             document.getElementById('l-no').value = "";
         } catch (e) {
-            alert("त्रुटि भयो!"); 
+            alert("त्रुटि भयो: " + e.message); 
             btn.innerText = "📤 आवेदन दर्ता गर्नुहोस्"; 
             btn.disabled = false;
         }
@@ -320,8 +363,11 @@
                     document.getElementById('p-lno').innerText = record.lNo;
                     document.getElementById('p-route').innerText = record.route;
                     document.getElementById('p-dist').innerText = record.dist;
-                    document.getElementById('p-date').innerText = record.date;
-                    document.getElementById('p-exp-date').innerText = record.expDate || record.date;
+                    
+                    // Format dates to clean BS String
+                    document.getElementById('p-date').innerText = formatBsDate(record.date);
+                    document.getElementById('p-exp-date').innerText = formatBsDate(record.expDate || record.date);
+                    
                     document.getElementById('p-amount').innerText = record.amount || "0";
                     document.getElementById('p-remarks').innerText = record.remarks || "-";
                     printBtn.style.display = 'block';
