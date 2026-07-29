@@ -2,163 +2,200 @@
 <html lang="ne">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>नागरिक सेवा - अनलाइन पटके दर्ता</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>नेपाल सरकार | पटके यात्रा इजाजत-पत्र पोर्टल</title>
     <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --gov-blue: #1E3A8A; --gov-red: #E11D48; --bg: #F8FAFC; }
+        :root { --gov-red: #B91C1C; --gov-blue: #1E3A8A; --bg-gray: #F8FAFC; --border: #CBD5E1; }
         * { box-sizing: border-box; font-family: 'Mukta', sans-serif; }
-        body { margin: 0; background: var(--bg); color: #0F172A; }
-        .header { background: #fff; padding: 15px 20px; border-bottom: 2px solid var(--gov-red); text-align: center; }
-        .header h2 { margin: 0; color: var(--gov-blue); font-size: 20px; }
-        .container { max-width: 600px; margin: 20px auto; padding: 0 15px; }
-        .card { background: #fff; padding: 18px; border-radius: 10px; border: 1px solid #E2E8F0; margin-bottom: 15px; }
-        .card-title { font-weight: 800; color: var(--gov-blue); margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-        .form-group { margin-bottom: 12px; }
-        label { font-size: 13px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #CBD5E1; border-radius: 6px; outline: none; }
-        .readonly-box { background: #F1F5F9; font-weight: bold; }
-        .btn { width: 100%; padding: 12px; background: var(--gov-blue); color: #fff; border: none; border-radius: 6px; font-weight: 700; font-size: 16px; cursor: pointer; }
-        .btn-check { background: #0284C7; margin-top: 10px; }
-        .btn-print { background: #059669; margin-top: 10px; display: none; }
-        .status-badge { display: inline-block; padding: 5px 10px; border-radius: 4px; font-weight: bold; }
+        body { margin: 0; background-color: var(--bg-gray); color: #0F172A; }
+        .top-stripe { background: var(--gov-red); height: 6px; }
+        .header { background: #fff; padding: 20px; border-bottom: 3px solid var(--gov-blue); text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .header img { height: 80px; }
+        .header h3 { margin: 0; color: var(--gov-red); font-size: 16px; }
+        .header h1 { margin: 2px 0; color: var(--gov-blue); font-size: 22px; }
+        .header p { margin: 0; color: #475569; font-size: 14px; font-weight: 600; }
+        
+        .container { max-width: 650px; margin: 20px auto; padding: 0 15px; }
+        .card { background: #fff; padding: 22px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .card-title { font-size: 16px; font-weight: 800; color: var(--gov-blue); margin-bottom: 15px; border-bottom: 2px solid #F1F5F9; padding-bottom: 8px; }
+        
+        .form-group { margin-bottom: 14px; }
+        label { font-size: 13px; font-weight: 700; color: #334155; display: block; margin-bottom: 4px; }
+        input, select { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; outline: none; font-size: 15px; }
+        input:focus, select:focus { border-color: var(--gov-blue); }
+        .readonly-box { background: #F1F5F9; font-weight: bold; color: var(--gov-blue); }
+
+        .btn { width: 100%; padding: 12px; background: var(--gov-blue); color: #fff; border: none; border-radius: 8px; font-weight: 700; font-size: 16px; cursor: pointer; }
+        .btn:hover { background: #1E40AF; }
+        .btn-check { background: #0284C7; }
+        .btn-print { background: #15803D; margin-top: 10px; display: none; }
+
+        .status-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 13px; }
         .status-Pending { background: #FEF08A; color: #854D0E; }
-        .status-Approved { background: #BBF7D0; color: #166534; }
-        .status-Rejected { background: #FECDD3; color: #991B1B; }
+        .status-Approved { background: #DCFCE7; color: #166534; }
+        .status-Rejected { background: #FEE2E2; color: #991B1B; }
+
         @media print { .no-print { display: none !important; } .print-area { display: block !important; } }
-        .print-area { display: none; padding: 20px; border: 2px solid var(--gov-blue); border-radius: 8px; background: white; }
+        .print-area { display: none; padding: 30px; border: 3px double var(--gov-blue); background: #fff; }
+        .receipt-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .receipt-table td { padding: 8px; border-bottom: 1px solid #E2E8F0; font-size: 14px; }
     </style>
 </head>
 <body>
 
+<div class="top-stripe no-print"></div>
+
 <div class="header no-print">
-    <h2>यातायात व्यवस्था कार्यालय, बागलुङ</h2>
-    <p>सार्वजनिक पटके अनलाइन आवेदन प्रणाली</p>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Emblem_of_Nepal.svg/512px-Emblem_of_Nepal.svg.png" alt="Emblem">
+    <h3>नेपाल सरकार</h3>
+    <h1>भौतिक पूर्वाधार तथा यातायात मन्त्रालय</h1>
+    <p>यातायात व्यवस्था कार्यालय, बागलुङ</p>
 </div>
 
 <div class="container no-print">
-    <!-- Check Application Status -->
-    <div class="card" style="background: #EFF6FF;">
+    <!-- SEARCH STATUS -->
+    <div class="card" style="border-top: 4px solid #0284C7;">
         <div class="card-title">🔍 आवेदनको स्थिति जाँच्नुहोस्</div>
         <div class="form-group">
-            <input type="text" id="search-vno" placeholder="सवारी साधन नं हाल्नुहोस् (उदा: ध १ ख १२३४)">
+            <label>सवारी साधन नम्बर:</label>
+            <input type="text" id="search-vno" placeholder="उदा: ध १ ज ११">
         </div>
-        <button class="btn btn-check" onclick="checkStatus()">स्थिति हेर्नुहोस् / रसिद प्रिन्ट</button>
-        <div id="status-result" style="margin-top: 10px; font-weight: bold;"></div>
+        <button class="btn btn-check" onclick="checkStatus()">स्थिति खोज्नुहोस्</button>
+        <div id="status-result" style="margin-top: 12px; font-weight: bold;"></div>
     </div>
 
-    <!-- Application Form -->
-    <div class="card">
-        <div class="card-title">१. रुट छनौट</div>
+    <!-- PUBLIC FORM -->
+    <div class="card" style="border-top: 4px solid var(--gov-blue);">
+        <div class="card-title">📝 नयाँ पटके अनलाइन आवेदन फारम</div>
+        
         <div class="form-group">
             <label>प्रस्थान विन्दु (FROM):</label>
-            <select id="from-select" onchange="onFromChange()"><option value="">-- छान्नुहोस् --</option></select>
+            <select id="from-select" onchange="calculateRoute()">
+                <option value="">-- छान्नुहोस् --</option>
+                <option value="BAGLUNG">BAGLUNG</option>
+                <option value="BENI">BENI</option>
+                <option value="BHURUNG TATOPANI">BHURUNG TATOPANI</option>
+                <option value="BURTIBANG">BURTIBANG</option>
+                <option value="BUTWAL">BUTWAL</option>
+                <option value="DHOPATAN">DHOPATAN</option>
+                <option value="GALKOT">GALKOT</option>
+                <option value="KATHMANDU">KATHMANDU</option>
+                <option value="KOROLA BOARDER">KOROLA BOARDER</option>
+                <option value="KUSMA">KUSMA</option>
+                <option value="MUGLIN">MUGLIN</option>
+                <option value="POKHARA">POKHARA</option>
+            </select>
         </div>
+
         <div class="form-group">
             <label>गन्तव्य विन्दु (TO):</label>
-            <select id="to-select" onchange="onToChange()" disabled><option value="">-- पहिले प्रस्थान छान्नुहोस् --</option></select>
+            <select id="to-select" onchange="calculateRoute()">
+                <option value="">-- छान्नुहोस् --</option>
+                <option value="BAGLUNG">BAGLUNG</option>
+                <option value="BENI">BENI</option>
+                <option value="BHURUNG TATOPANI">BHURUNG TATOPANI</option>
+                <option value="BURTIBANG">BURTIBANG</option>
+                <option value="BUTWAL">BUTWAL</option>
+                <option value="DHOPATAN">DHOPATAN</option>
+                <option value="GALKOT">GALKOT</option>
+                <option value="KATHMANDU">KATHMANDU</option>
+                <option value="KOROLA BOARDER">KOROLA BOARDER</option>
+                <option value="KUSMA">KUSMA</option>
+                <option value="MUGLIN">MUGLIN</option>
+                <option value="POKHARA">POKHARA</option>
+            </select>
         </div>
-    </div>
 
-    <div class="card">
-        <div class="card-title">२. सवारी विवरण</div>
-        <div class="form-group"><label>सवारी नम्बर:</label><input type="text" id="v-no" placeholder="उदा: ध १ ख १२३४"></div>
-        <div class="form-group"><label>लाइसेन्स नम्बर:</label><input type="text" id="l-no" placeholder="इजाजत पत्र नं"></div>
-    </div>
+        <div class="form-group">
+            <label>सवारी साधन नम्बर:</label>
+            <input type="text" id="v-no" placeholder="उदा: ध १ ज ११">
+        </div>
 
-    <div class="card">
-        <div class="card-title">३. हिसाब विवरण</div>
-        <div class="form-group"><label>छानिएको रुट:</label><input type="text" id="route-name" class="readonly-box" readonly></div>
-        <div class="form-group"><label>दुरी (Km):</label><input type="text" id="v-dist" class="readonly-box" readonly></div>
-    </div>
+        <div class="form-group">
+            <label>चालक/इजाजत पत्र (लाइसेन्स) नम्बर:</label>
+            <input type="text" id="l-no" placeholder="उदा: ०१-०६-००१२३४५६">
+        </div>
 
-    <div class="card">
-        <div class="card-title">४. कागजात अपलोड</div>
-        <div class="form-group"><label>रुट पर्मिट:</label><input type="file" id="route-photo" accept="image/*"></div>
-        <div class="form-group"><label>जाँचपास:</label><input type="file" id="fit-photo" accept="image/*"></div>
-    </div>
+        <div class="form-group">
+            <label>छानिएको रुट:</label>
+            <input type="text" id="route-name" class="readonly-box" readonly placeholder="स्वचालित आउनेछ">
+        </div>
 
-    <button id="submit-btn" class="btn" onclick="submitPublicForm()">📤 विवरण बुझाउनुहोस्</button>
-    <button id="print-btn" class="btn btn-print" onclick="window.print()">🖨️ स्वीकृत रसिद प्रिन्ट गर्नुहोस्</button>
+        <div class="form-group">
+            <label>दुरी (Km):</label>
+            <input type="text" id="v-dist" class="readonly-box" readonly placeholder="0 Km">
+        </div>
+
+        <div class="form-group">
+            <label>रुट पर्मिट कागजात (Photo):</label>
+            <input type="file" id="route-photo" accept="image/*">
+        </div>
+
+        <div class="form-group">
+            <label>जाँचपास प्रमाणपत्र (Photo):</label>
+            <input type="file" id="fit-photo" accept="image/*">
+        </div>
+
+        <button id="submit-btn" class="btn" onclick="submitPublicForm()">📤 आवेदन दर्ता गर्नुहोस्</button>
+        <button id="print-btn" class="btn btn-print" onclick="window.print()">🖨️ स्वीकृत रसिद प्रिन्ट गर्नुहोस्</button>
+    </div>
 </div>
 
-<!-- Receipt Printable Format -->
+<!-- PRINT RECEIPT -->
 <div class="print-area">
-    <h3 style="text-align:center; color:var(--gov-blue); margin:0;">यातायात व्यवस्था कार्यालय, बागलुङ</h3>
-    <h4 style="text-align:center; margin:5px 0 15px 0;">पटके यात्रा इजाजत–पत्र (Official Receipt)</h4>
-    <hr>
-    <p><b>स्थिति:</b> <span style="color:green; font-weight:bold;">APPROVED (स्वीकृत)</span></p>
-    <p><b>सवारी साधन नम्बर:</b> <span id="p-vno"></span></p>
-    <p><b>इजाजत पत्र नं:</b> <span id="p-lno"></span></p>
-    <p><b>रुट:</b> <span id="p-route"></span></p>
-    <p><b>दुरी:</b> <span id="p-dist"></span></p>
-    <p><b>मिति:</b> <span id="p-date"></span></p>
+    <div style="text-align: center; border-bottom:2px solid var(--gov-red); padding-bottom:10px;">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Emblem_of_Nepal.svg/512px-Emblem_of_Nepal.svg.png" style="height:70px;">
+        <h2 style="margin:0; color:var(--gov-red);">नेपाल सरकार</h2>
+        <h3 style="margin:2px 0; color:var(--gov-blue);">यातायात व्यवस्था कार्यालय, बागलुङ</h3>
+        <p style="margin:0; font-weight:bold; color:var(--gov-red);">पटके यात्रा इजाजत–पत्र (Temporary Route Permit)</p>
+    </div>
+    <table class="receipt-table">
+        <tr><td><b>जारी मिति:</b></td><td><span id="p-date"></span></td></tr>
+        <tr><td><b style="color:var(--gov-red);">म्याद सकिने मिति:</b></td><td><b id="p-exp-date" style="color:var(--gov-red);"></b></td></tr>
+        <tr><td><b>सवारी साधन नम्बर:</b></td><td><b id="p-vno"></b></td></tr>
+        <tr><td><b>लाइसेन्स/इजाजत पत्र नं:</b></td><td><span id="p-lno"></span></td></tr>
+        <tr><td><b>स्वीकृत रुट:</b></td><td><b id="p-route"></b></td></tr>
+        <tr><td><b>कुल दुरी:</b></td><td><span id="p-dist"></span></td></tr>
+        <tr><td><b>राजस्व रकम:</b></td><td>Rs. <span id="p-amount"></span></td></tr>
+    </table>
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyjSOGqaIHZosAdh2cIT9AGEuTPS-G0CdtYSPXyaPn95uGT1OViN3rdtq-aaoxF7c7_hg/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwB7IF7DlkPoxZIU2Z_gOCziQUBkKE3eCufIB_ffgHrlFRaol1rUsFFiFL2_iJZsXoQ9g/exec";
 
     const routeData = [
-        { from: "muktinath", to: "baglung", km: 107 },
-        { from: "korola boarder", to: "baglung", km: 211 },
-        { from: "muktinath", to: "muglin", km: 264 },
-        { from: "korola boarder", to: "muglin", km: 357 },
-        { from: "butwal", to: "kharbang", km: 144 },
-        { from: "suppadeurali", to: "kharbang", km: 142 },
-        { from: "suppadeurali", to: "baglung", km: 147 },
-        { from: "butwal", to: "ramdi", km: 62 },
-        { from: "rukumkot", to: "burtibang", km: 89 },
-        { from: "khalanga rukum west", to: "burtibang", km: 106 },
-        { from: "tamghas", to: "kharbang", km: 38 },
-        { from: "dhopatan", to: "baglung", km: 130 },
-        { from: "butwal", to: "belbagar baglung", km: 176 },
-        { from: "beni", to: "baglung", km: 26 },
-        { from: "singha tatopani", to: "baglung", km: 38 },
-        { from: "bhurung tatopani", to: "baglung", km: 70 },
-        { from: "narayanghat", to: "baglung", km: 202 },
-        { from: "kathmandu", to: "baglung", km: 278 },
-        { from: "kathmandu", to: "muglin", km: 110 },
-        { from: "galkot", to: "baglung", km: 54 },
-        { from: "tamghas", to: "baglung", km: 103 },
-        { from: "palpa", to: "baglung", km: 136 },
-        { from: "ridi", to: "baglung", km: 85 }
+        { from: "BHURUNG TATOPANI", to: "BAGLUNG", km: 70 },
+        { from: "DHOPATAN", to: "BAGLUNG", km: 130 },
+        { from: "KATHMANDU", to: "BAGLUNG", km: 278 },
+        { from: "POKHARA", to: "BAGLUNG", km: 72 },
+        { from: "BURTIBANG", to: "BAGLUNG", km: 92 },
+        { from: "BENI", to: "BAGLUNG", km: 26 },
+        { from: "KUSMA", to: "BAGLUNG", km: 14 }
     ];
 
-    function initRoutes() {
-        const fromSelect = document.getElementById('from-select');
-        const uniqueFrom = [...new Set(routeData.map(item => item.from))].sort();
-        uniqueFrom.forEach(f => {
-            let opt = document.createElement('option');
-            opt.value = f; opt.textContent = f.toUpperCase();
-            fromSelect.appendChild(opt);
-        });
-    }
+    function cleanName(str) { return str ? str.toString().trim().toUpperCase() : ''; }
 
-    function onFromChange() {
-        const sel = document.getElementById('from-select').value;
-        const toSel = document.getElementById('to-select');
-        toSel.innerHTML = '<option value="">-- छान्नुहोस् --</option>';
-        if(!sel) { toSel.disabled = true; return; }
-        routeData.filter(i => i.from === sel).forEach(i => {
-            let opt = document.createElement('option');
-            opt.value = i.to; opt.textContent = i.to.toUpperCase() + ` (${i.km} Km)`;
-            opt.dataset.km = i.km;
-            toSel.appendChild(opt);
-        });
-        toSel.disabled = false;
-    }
+    function calculateRoute() {
+        const fromVal = cleanName(document.getElementById('from-select').value);
+        const toVal = cleanName(document.getElementById('to-select').value);
 
-    function onToChange() {
-        const f = document.getElementById('from-select').value;
-        const tOpt = document.getElementById('to-select').options[document.getElementById('to-select').selectedIndex];
-        if(!tOpt.value) return;
-        document.getElementById('route-name').value = f.toUpperCase() + " ➔ " + tOpt.value.toUpperCase();
-        document.getElementById('v-dist').value = tOpt.dataset.km + " Km";
+        if (!fromVal || !toVal) return;
+        if (fromVal === toVal) { alert("प्रस्थान र गन्तव्य विन्दु एउटै हुन सक्दैन!"); return; }
+
+        document.getElementById('route-name').value = fromVal + " ➔ " + toVal;
+
+        const match = routeData.find(r => 
+            (cleanName(r.from) === fromVal && cleanName(r.to) === toVal) || 
+            (cleanName(r.from) === toVal && cleanName(r.to) === fromVal)
+        );
+
+        document.getElementById('v-dist').value = match ? match.km + " Km" : "50 Km";
     }
 
     const fileToBase64 = file => new Promise((res, rej) => {
         const reader = new FileReader(); reader.readAsDataURL(file);
-        reader.onload = () => res({ data: reader.result.split(',')[1], type: file.type });
+        reader.onload = () => res(reader.result.split(',')[1]);
         reader.onerror = err => rej(err);
     });
 
@@ -170,35 +207,38 @@
         const routeFile = document.getElementById('route-photo').files[0];
         const fitFile = document.getElementById('fit-photo').files[0];
 
-        if(!vNo || !lNo || !route) { alert("कृपया सम्पूर्ण विवरण भर्नुहोस्!"); return; }
+        if(!vNo || !lNo || !route) { alert("कृपया सम्पूर्ण आवश्यक विवरण भर्नुहोस्!"); return; }
 
         const btn = document.getElementById('submit-btn');
-        btn.innerText = "पठाउँदैछ..."; btn.disabled = true;
+        btn.innerText = "दर्ता हुँदैछ..."; btn.disabled = true;
 
         try {
-            let routeP = routeFile ? await fileToBase64(routeFile) : null;
-            let fitP = fitFile ? await fileToBase64(fitFile) : null;
+            let routeP = routeFile ? await fileToBase64(routeFile) : "";
+            let fitP = fitFile ? await fileToBase64(fitFile) : "";
 
             const payload = {
                 action: "submitForm",
-                date: new Date().toLocaleDateString('ne-NP'),
+                date: new Date().toISOString().split('T')[0],
                 vNo: vNo, lNo: lNo, route: route, dist: dist,
                 routePhoto: routeP, fitPhoto: fitP
             };
 
             await fetch(SCRIPT_URL, { 
                 method: 'POST', 
-                mode: 'no-cors', 
+                mode: 'no-cors',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
                 body: JSON.stringify(payload) 
             });
 
-            alert("तपाईँको विवरण सफलतापुर्वक बुझाइयो! कार्यालयबाट स्वीकृत (Approve) भएपछि रसिद प्रिन्ट गर्न सकिनेछ।");
-            btn.innerText = "📤 विवरण बुझाउनुहोस्"; btn.disabled = false;
+            alert("तपाईँको पटके आवेदन सफलतापुर्वक दर्ता भयो!");
+            btn.innerText = "📤 आवेदन दर्ता गर्नुहोस्"; btn.disabled = false;
+            document.getElementById('v-no').value = ""; document.getElementById('l-no').value = "";
         } catch (e) {
-            alert("त्रुटि भयो!"); btn.innerText = "📤 विवरण बुझाउनुहोस्"; btn.disabled = false;
+            alert("त्रुटि भयो!"); btn.innerText = "📤 आवेदन दर्ता गर्नुहोस्"; btn.disabled = false;
         }
     }
+
+    function cleanStr(str) { return str ? str.toString().replace(/\s+/g, '').toLowerCase() : ''; }
 
     async function checkStatus() {
         const searchVNo = document.getElementById('search-vno').value.trim();
@@ -212,7 +252,7 @@
         try {
             const res = await fetch(SCRIPT_URL);
             const data = await res.json();
-            const record = data.find(r => r.vNo.toString().trim().toLowerCase() === searchVNo.toLowerCase());
+            const record = data.find(r => cleanStr(r.vNo) === cleanStr(searchVNo));
 
             if(record) {
                 resDiv.innerHTML = `स्थिति: <span class="status-badge status-${record.status}">${record.status}</span>`;
@@ -222,17 +262,17 @@
                     document.getElementById('p-route').innerText = record.route;
                     document.getElementById('p-dist').innerText = record.dist;
                     document.getElementById('p-date').innerText = record.date;
+                    document.getElementById('p-exp-date').innerText = record.expDate || record.date;
+                    document.getElementById('p-amount').innerText = record.amount || "0";
                     printBtn.style.display = 'block';
                 }
             } else {
                 resDiv.innerText = "कुनै विवरण भेटिएन।";
             }
         } catch(e) {
-            resDiv.innerText = "त्रुटि भयो!";
+            resDiv.innerText = "विवरण तान्न सकिएन!";
         }
     }
-
-    window.onload = initRoutes;
 </script>
 </body>
 </html>
