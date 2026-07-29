@@ -6,7 +6,8 @@
     <title>नेपाल सरकार | पटके यात्रा इजाजत-पत्र पोर्टल</title>
     <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Nepali Date Picker JS -->
+    <!-- Nepali Date Picker CSS & JS -->
+    <link href="https://nepalidatetimepicker.page365.com.np/nepali.datepicker.v4.0.1.min.css" rel="stylesheet" type="text/css"/>
     <script src="https://nepalidatetimepicker.page365.com.np/nepali.datepicker.v4.0.1.min.js" type="text/javascript"></script>
 
     <style>
@@ -79,7 +80,7 @@
 
         <div class="form-group">
             <label>आवेदन मिति (BS):</label>
-            <input type="text" id="v-bs-date" class="readonly-box" readonly placeholder="मिति लोड हुँदैछ...">
+            <input type="text" id="v-bs-date" class="nepali-datepicker" placeholder="मिति छान्नुहोस् (YYYY-MM-DD)">
         </div>
 
         <div class="form-group">
@@ -188,12 +189,14 @@
 </div>
 
 <script>
-    // ⚠️ यहाँ तपाईंको Apps Script Web App URL राख्नुहोस्
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyPaSA9POO_-MEWTPmq3gi-jd6H9ZgXsMLLefY2JXyKq2sw2VkaYLzKmaT2lUrYJYBTpw/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwugUksD0bXbc2q-AB6Pd3mnfSfqHIlL4uJ0frfgrThB79bCcx77TQUQciWlTsQwxtDqQ/exec";
 
-    // BS Date Format Helper Method
-    function formatBsDate(rawDate) {
+    // नेपाली BS मिति केवल YYYY-MM-DD मा ल्याउने फङ्सन
+    function cleanBsDate(rawDate) {
         if (!rawDate) return "-";
+        if (typeof rawDate === "string" && rawDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            return rawDate;
+        }
         if (rawDate.includes("GMT") || rawDate.includes("T")) {
             const d = new Date(rawDate);
             if (!isNaN(d.getTime()) && typeof NepaliFunctions !== "undefined") {
@@ -205,20 +208,19 @@
                 return `${bsObj.year}-${String(bsObj.month).padStart(2, '0')}-${String(bsObj.day).padStart(2, '0')}`;
             }
         }
-        return rawDate;
+        return rawDate.toString().split('T')[0];
     }
 
-    // आजको BS मिति स्वतः राख्ने
+    // Nepali DatePicker सुचारु गर्ने
     window.onload = function() {
-        const input = document.getElementById("v-bs-date");
-        try {
-            if (typeof NepaliFunctions !== "undefined") {
-                input.value = NepaliFunctions.GetCurrentBsDate().bsDate;
-            } else {
-                input.value = new Date().toISOString().split('T')[0];
-            }
-        } catch (e) {
-            input.value = new Date().toISOString().split('T')[0];
+        const dateInput = document.getElementById("v-bs-date");
+        if (typeof NepaliFunctions !== "undefined") {
+            dateInput.nepaliDatePicker({
+                ndpYear: true,
+                ndpMonth: true,
+                readOnlyInput: true
+            });
+            dateInput.value = NepaliFunctions.GetCurrentBsDate().bsDate;
         }
     };
 
@@ -254,11 +256,6 @@
 
     function cleanName(str) { return str ? str.toString().trim().toUpperCase() : ''; }
 
-    // 💡 नयाँ दर अनुसार स्वयम् राजस्व हिसाब गर्ने Logic:
-    // Up to 50 km: Rs 100
-    // 51-100 km: Rs 200
-    // 101-150 km: Rs 300
-    // 151-200 km: Rs 400 ...
     function calculateAutoRevenue(km) {
         if (!km || km <= 0) return 100;
         return Math.ceil(km / 50) * 100;
@@ -364,9 +361,9 @@
                     document.getElementById('p-route').innerText = record.route;
                     document.getElementById('p-dist').innerText = record.dist;
                     
-                    // Format dates to clean BS String
-                    document.getElementById('p-date').innerText = formatBsDate(record.date);
-                    document.getElementById('p-exp-date').innerText = formatBsDate(record.expDate || record.date);
+                    // Nepali BS Clean Date Only Format (YYYY-MM-DD)
+                    document.getElementById('p-date').innerText = cleanBsDate(record.date);
+                    document.getElementById('p-exp-date').innerText = cleanBsDate(record.expDate || record.date);
                     
                     document.getElementById('p-amount').innerText = record.amount || "0";
                     document.getElementById('p-remarks').innerText = record.remarks || "-";

@@ -78,8 +78,26 @@
 </div>
 
 <script>
-    // ⚠️ यहाँ तपाईंको Apps Script Web App URL हाल्नुहोस्
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyPaSA9POO_-MEWTPmq3gi-jd6H9ZgXsMLLefY2JXyKq2sw2VkaYLzKmaT2lUrYJYBTpw/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwugUksD0bXbc2q-AB6Pd3mnfSfqHIlL4uJ0frfgrThB79bCcx77TQUQciWlTsQwxtDqQ/exec";
+
+    function cleanBsDate(rawDate) {
+        if (!rawDate) return "-";
+        if (typeof rawDate === "string" && rawDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            return rawDate;
+        }
+        if (rawDate.includes("GMT") || rawDate.includes("T")) {
+            const d = new Date(rawDate);
+            if (!isNaN(d.getTime()) && typeof NepaliFunctions !== "undefined") {
+                const bsObj = NepaliFunctions.AD2BS({
+                    year: d.getFullYear(),
+                    month: d.getMonth() + 1,
+                    day: d.getDate()
+                });
+                return `${bsObj.year}-${String(bsObj.month).padStart(2, '0')}-${String(bsObj.day).padStart(2, '0')}`;
+            }
+        }
+        return rawDate.toString().split('T')[0];
+    }
 
     async function loadRequests() {
         const tbody = document.getElementById('table-body');
@@ -103,9 +121,12 @@
                     revenue += Number(r.amount || 0);
                 }
 
+                const cleanDate = cleanBsDate(r.date);
+                const cleanExpDate = cleanBsDate(r.expDate || r.date);
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${r.date || '-'}</td>
+                    <td>${cleanDate}</td>
                     <td><b>${r.vNo}</b></td>
                     <td>${r.lNo}</td>
                     <td>${r.route}<br><small>(${r.dist})</small></td>
@@ -113,8 +134,8 @@
                         ${r.routePhoto ? `<a href="${r.routePhoto}" target="_blank">रुट पर्मिट</a><br>` : ''}
                         ${r.fitPhoto ? `<a href="${r.fitPhoto}" target="_blank">जाँचपास</a>` : ''}
                     </td>
-                    <td><input type="number" id="amt-${r.id}" value="${r.amount || 500}" style="width:70px;"></td>
-                    <td><input type="text" id="exp-${r.id}" class="nepali-datepicker" value="${r.expDate || r.date || ''}" placeholder="YYYY-MM-DD" style="width:110px;"></td>
+                    <td><input type="number" id="amt-${r.id}" value="${r.amount || 100}" style="width:70px;"></td>
+                    <td><input type="text" id="exp-${r.id}" class="nepali-datepicker" value="${cleanExpDate}" placeholder="YYYY-MM-DD" style="width:110px;"></td>
                     <td><input type="text" id="rem-${r.id}" value="${r.remarks || ''}" placeholder="कैफियत..." style="width:100px;"></td>
                     <td><span class="badge badge-${r.status}">${r.status}</span></td>
                     <td>
@@ -130,12 +151,16 @@
             document.getElementById('stat-approved').innerText = approved;
             document.getElementById('stat-revenue').innerText = "रु. " + revenue;
 
-            // Activate Nepali Date Picker on freshly loaded input elements
+            // Activate Nepali Date Picker on table dynamic rows
             setTimeout(() => {
                 const dateInputs = document.querySelectorAll('.nepali-datepicker');
                 dateInputs.forEach(input => {
                     if (typeof NepaliFunctions !== "undefined") {
-                        input.nepaliDatePicker({ ndpYear: true, ndpMonth: true });
+                        input.nepaliDatePicker({
+                            ndpYear: true,
+                            ndpMonth: true,
+                            readOnlyInput: true
+                        });
                     }
                 });
             }, 100);
